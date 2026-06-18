@@ -3,19 +3,23 @@
    ═══════════════════════════════════════ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 14px;
   color: #e0e0e0;
   background: #1a1a2e;
-  height: 100dvh;
   overflow: hidden;
 }
 
 /* ── 容器（移动端：单栏；桌面端：左右 flex）── */
 #hermes-page {
   display: flex;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
 
