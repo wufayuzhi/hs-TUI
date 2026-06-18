@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEM 知识库 - NTN 总控台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e; color: #e0e0e0;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px; padding: 24px;
+}
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.header h2 { color: #4fc3f7; font-size: 20px; }
+
+/* ── Tab 切换 ── */
+.tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2a2a4a; }
+.tab {
+  padding: 10px 24px; cursor: pointer; font-size: 14px;
+  color: #a0a0c0; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.15s;
+}
+.tab:hover { color: #e0e0e0; }
+.tab.active { color: #4fc3f7; border-bottom-color: #4fc3f7; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── 概览卡片 ── */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.card {
+  background: #16213e; border-radius: 8px; padding: 16px; border: 1px solid #2a2a4a;
+}
+.card .label { font-size: 12px; color: #a0a0c0; margin-bottom: 6px; }
+.card .value { font-size: 18px; font-weight: 600; }
+.card .value.green { color: #66bb6a; }
+.card .value.blue { color: #42a5f5; }
+.card .value.gray { color: #90a4ae; }
+
+/* ── 搜索 ── */
+.search-row {
+  display: flex; gap: 10px; margin-bottom: 16px;
+}
+.search-row input {
+  flex: 1; background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 8px;
+  padding: 10px 16px; color: #e0e0e0; font-size: 14px;
+}
+.search-row input:focus { outline: none; border-color: #4fc3f7; }
+
+.btn {
+  padding: 8px 20px; border-radius: 6px; border: 1px solid #2a2a4a;
+  background: #16213e; color: #e0e0e0; font-size: 13px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: #1a1a3e; border-color: #4fc3f7; }
+.btn.primary { background: #1a237e; border-color: #4fc3f7; color: #4fc3f7; }
+.btn.primary:hover { background: #283593; }
+.btn.sm { padding: 4px 12px; font-size: 12px; }
+
+/* ── 搜索过滤 ── */
+.filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filters select {
+  background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 6px;
+  padding: 6px 12px; color: #e0e0e0; font-size: 13px;
+}
+.filters span { color: #666; font-size: 12px; }
+
+/* ── 搜索结果 ── */
+.result-item {
+  background: #16213e; border: 1px solid #2a2a4a; border-radius: 8px;
+  margin-bottom: 10px; overflow: hidden;
+}
+.result-item .summary {
+  padding: 14px 16px; cursor: pointer; display: flex;
+  justify-content: space-between; align-items: flex-start;
+  gap: 12px; transition: background 0.1s;
+}
+.result-item .summary:hover { background: #1a1a3e; }
+.result-item .summary-left { flex: 1; min-width: 0; }
+.result-item .title { font-weight: 600; margin-bottom: 4px; color: #e0e0e0; }
+.result-item .meta { font-size: 12px; color: #666; margin-bottom: 4px; }
+.result-item .preview { font-size: 13px; color: #a0a0a0; line-height: 1.5; }
+.result-item .score {
+  display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px;
+}
+.score-high { background: #1b5e20; color: #a5d6a7; }
+.score-mid { background: #e65100; color: #ffcc80; }
+.score-low { background: #b71c1c; color: #ef9a9a; }
+
+.result-item .expand-icon {
+  color: #666; font-size: 18px; flex-shrink: 0; margin-top: 2px;
+  transition: transform 0.2s;
+}
+.result-item.open .expand-icon { transform: rotate(90deg); }
+
+.result-item .full-text {
+  display: none; padding: 0 16px 14px; font-size: 13px; color: #a0a0a0;
+  line-height: 1.6; white-space: pre-wrap; border-top: 1px solid #2a2a4a;
+  margin: 0 16px; padding: 12px 0;
+}
+.result-item.open .full-text { display: block; }
+
+/* ── 知识库列表 ── */
+.kb-list { display: flex; flex-direction: column; gap: 10px; }
+.kb-card {
+  background: #16213e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px;
+}
+.kb-card .kb-name { font-weight: 600; color: #4fc3f7; font-size: 15px; margin-bottom: 8px; }
+.kb-card .kb-row { display: flex; gap: 20px; font-size: 13px; color: #a0a0a0; }
+.kb-card .kb-row span { min-width: 80px; }
+
+.empty { text-align: center; padding: 40px; color: #666; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2>🧠 MEM 知识库</h2>
+</div>
+
+<!-- 概览卡片 -->
+<div class="cards">
+  <div class="card"><div class="label">知识储备库</div><div class="value green" id="kb-count">加载中...</div></div>
+  <div class="card"><div class="label">经验储备库</div><div class="value blue" id="exp-count">加载中...</div></div>
+  <div class="card"><div class="label">服务状态</div><div class="value" id="mem-status">加载中...</div></div>
+</div>
+
+<!-- Tab -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(this, 'search')">🔍 知识搜索</div>
+  <div class="tab" onclick="switchTab(this, 'kblist')">📚 知识库管理</div>
+</div>
+
+<!-- 搜索 Tab -->
+<div class="tab-content active" id="tab-search">
+  <div class="search-row">
+    <input type="text" id="search-input" placeholder="搜索知识库内容，输入关键词..." onkeydown="if(event.key==='Enter') searchKB()">
+    <button class="btn primary" onclick="searchKB()">🔍 搜索</button>
+  </div>
+  <div class="filters">
+    <select id="project-filter">
+      <option value="">全部知识库</option>
+      <option value="knowledge_reserve">知识储备库</option>
+      <option value="experience_reserve">经验储备库</option>
+    </select>
+    <span id="result-count">输入关键词即可搜索</span>
+  </div>
+  <div id="results"></div>
+</div>
+
+<!-- 知识库管理 Tab -->
+<div class="tab-content" id="tab-kblist">
+  <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
+    <button class="btn primary" onclick="loadKBList()">🔄 刷新知识库列表</button>
+    <span id="kb-list-status" style="color:#666;font-size:12px;"></span>
+  </div>
+  <div id="kb-list-container"></div>
+</div>
+
+<script>
+var MEM_URL = "/api/mem";
+
+function $(id) { return document.getElementById(id); }
+
+// Tab 切换
+function switchTab(el, name) {
+  document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
+  document.querySelectorAll(".tab-content").forEach(function(t) { t.classList.remove("active"); });
+  el.classList.add("active");
+  $("tab-" + name).classList.add("active");
+}
+
+// ── 加载概览 ──
+async function loadStats() {
+  var memEl = $("mem-status");
+  try {
+    var r = await fetch(MEM_URL + "/health");
+    var h = await r.json();
+    memEl.textContent = "✅ 正常";
+    memEl.className = "value green";
+  } catch(e) {
+    memEl.textContent = "❌ 离线";
+    memEl.className = "value";
+    return;
+  }
+
+  try {
+    var r = await fetch(MEM_URL + "/v1/knowledge");
+    var kb = await r.json();
+    (kb.knowledge_bases || []).forEach(function(b) {
+      if (b.project_id === "knowledge_reserve") {
+        $("kb-count").textContent = b.document_count + " 篇";
+      }
+      if (b.project_id === "experience_reserve") {
+        $("exp-count").textContent = b.document_count + " 篇";
+      }
+    });
+  } catch(e) {}
+}
+
+// ── 知识搜索 ──
+async function searchKB() {
+  var query = $("search-input").value.trim();
+  if (!query) {
+    $("results").innerHTML = '<div class="empty">请输入关键词搜索</div>';
+    $("result-count").textContent = "";
+    return;
+  }
+
+  $("result-count").textContent = "搜索中...";
+  var project = $("project-filter").value;
+
+  try {
+    var body = {
+      query: query,
+      limit: 30,
+      threshold: 0.0,
+      source: "knowledge_doc"
+    };
+    if (project) body.project_id = project;
+
+    var r = await fetch(MEM_URL + "/v1/memory/search", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body)
+    });
+
+    if (!r.ok) {
+      $("results").innerHTML = '<div class="empty">搜索请求失败 (' + r.status + ')</div>';
+      $("result-count").textContent = "";
+      return;
+    }
+
+    var data = await r.json();
+    var results = data.results || data.memories || [];
+    renderResults(results);
+  } catch(e) {
+    $("results").innerHTML = '<div class="empty">连接失败: ' + e.message + '</div>';
+  }
+}
+
+function renderResults(results) {
+  var container = $("results");
+  var count = $("result-count");
+
+  if (!results || results.length === 0) {
+    count.textContent = "未找到匹配结果";
+    container.innerHTML = '<div class="empty">没有找到相关内容，试试其他关键词</div>';
+    return;
+  }
+
+  count.textContent = "共 " + results.length + " 条结果";
+
+  container.innerHTML = results.map(function(r, idx) {
+    var text = r.text || r.content || "";
+    var source = r.source || r.project_id || "";
+    var score = r.score || r.similarity || 0;
+    var raw = r._raw_text || text;
+
+    var preview = text;
+    if (preview.length > 200) preview = preview.slice(0, 200) + "...";
+
+    var scoreClass = score >= 0.7 ? "score-high" : (score >= 0.4 ? "score-mid" : "score-low");
+
+    return '<div class="result-item" id="res-' + idx + '">'
+      + '<div class="summary" onclick="toggleResult(' + idx + ')">'
+      + '<div class="summary-left">'
+      + '<div class="title">' + (r.title || "知识片段 " + (idx + 1)) + '</div>'
+      + '<div class="meta">'
+      + '<span class="' + scoreClass + '" style="padding:1px 6px;border-radius:3px;font-size:11px;">' + (typeof score === "number" ? score.toFixed(2) : score) + '</span>'
+      + ' 来源: ' + source
+      + ' · ' + (r.created_at || r.when || "-")
+      + '</div>'
+      + '<div class="preview">' + escapeHtml(preview) + '</div>'
+      + '</div>'
+      + '<div class="expand-icon">▶</div>'
+      + '</div>'
+      + '<div class="full-text">' + escapeHtml(raw) + '</div>'
+      + '</div>';
+  }).join("");
+}
+
+function toggleResult(idx) {
+  var el = $("res-" + idx);
+  el.classList.toggle("open");
+}
+
+// ── 知识库列表 ──
+async function loadKBList() {
+  var container = $("kb-list-container");
+  $("kb-list-status").textContent = "加载中...";
+
+  try {
+    var r = await fetch(MEM_URL + "/v1/knowledge");
+    var data = await r.json();
+    var list = data.knowledge_bases || [];
+    $("kb-list-status").textContent = "共 " + list.length + " 个知识库";
+
+    if (list.length === 0) {
+      container.innerHTML = '<div class="empty">暂无知识库</div>';
+      return;
+    }
+
+    container.innerHTML = list.map(function(kb) {
+      return '<div class="kb-card">'
+        + '<div class="kb-name">' + kb.name + '</div>'
+        + '<div class="kb-row">'
+        + '<span><b>ID:</b> ' + kb.kb_id + '</span>'
+        + '<span><b>项目:</b> ' + kb.project_id + '</span>'
+        + '<span><b>文档数:</b> ' + (kb.document_count || 0) + '</span>'
+        + '</div>'
+        + '<div class="kb-row" style="margin-top:6px;">'
+        + '<span><b>状态:</b> ' + kb.status + '</span>'
+        + '<span><b>分块策略:</b> ' + (kb.chunk_strategy || "默认") + '</span>'
+        + '<span><b>刷新策略:</b> ' + (kb.refresh_policy || "手动") + '</span>'
+        + '</div>'
+        + (kb.description ? '<div style="margin-top:6px;font-size:12px;color:#666;">' + kb.description + '</div>' : "")
+        + '<div style="margin-top:8px;">'
+        + '<button class="btn sm" onclick="searchKBIn(\'' + kb.project_id + '\')">搜索此库</button>'
+        + '</div>'
+        + '</div>';
+    }).join("");
+  } catch(e) {
+    container.innerHTML = '<div class="empty">加载失败: ' + e.message + '</div>';
+    $("kb-list-status").textContent = "加载失败";
+  }
+}
+
+function searchKBIn(project) {
+  $("project-filter").value = project;
+  switchTab(document.querySelectorAll(".tab")[0], "search");
+  var input = $("search-input");
+  if (input.value.trim()) searchKB();
+}
+
+function escapeHtml(s) {
+  if (!s) return "";
+  var d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// 启动时加载
+loadStats();
+loadKBList();
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCB 管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  padding: 24px;
+}
+
+/* ── 标题栏 ── */
+.header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+}
+.header h2 { color: #4fc3f7; font-size: 20px; }
+.header .badge {
+  font-size: 12px; padding: 2px 10px; border-radius: 10px;
+  background: #2a2a4a; color: #a0a0c0;
+}
+
+/* ── 状态卡片 ── */
+.cards {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.card {
+  background: #16213e; border-radius: 8px; padding: 16px; border: 1px solid #2a2a4a;
+}
+.card .label { font-size: 12px; color: #a0a0c0; margin-bottom: 6px; }
+.card .value { font-size: 16px; font-weight: 600; }
+.card .value.green { color: #66bb6a; }
+.card .value.gray  { color: #90a4ae; }
+.card .value.blue  { color: #42a5f5; }
+
+/* ── 实时进度面板 ── */
+.progress-panel {
+  background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a;
+  padding: 20px; margin-bottom: 20px;
+}
+.progress-panel h3 { color: #4fc3f7; font-size: 15px; margin-bottom: 14px; }
+
+.progress-bar-bg {
+  height: 8px; background: #2a2a4a; border-radius: 4px; margin: 10px 0; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #4fc3f7, #42a5f5);
+  border-radius: 4px; width: 0%; transition: width 0.5s;
+}
+
+.progress-table { width: 100%; font-size: 13px; }
+.progress-table td { padding: 6px 12px; }
+.progress-table td:first-child { color: #a0a0c0; width: 90px; }
+
+/* ── Remote Control 区域 ── */
+.remote-section {
+  background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a; overflow: hidden;
+}
+.remote-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px; border-bottom: 1px solid #2a2a4a;
+}
+.remote-header h3 { color: #4fc3f7; font-size: 15px; }
+.remote-header .setup-link { color: #42a5f5; font-size: 12px; cursor: pointer; }
+.remote-frame {
+  width: 100%; height: 520px; border: none; background: #0d0d1a;
+}
+.remote-placeholder {
+  width: 100%; height: 520px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  background: #0d0d1a; color: #666;
+  font-size: 14px;
+}
+.remote-placeholder .big-icon { font-size: 48px; opacity: 0.3; }
+.remote-placeholder .tip { color: #90a4ae; font-size: 12px; }
+
+/* ── 操作按钮 ── */
+.actions { display: flex; gap: 10px; margin-bottom: 20px; }
+.btn {
+  padding: 8px 20px; border-radius: 6px; border: 1px solid #2a2a4a;
+  background: #16213e; color: #e0e0e0; font-size: 13px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { background: #1a1a3e; border-color: #4fc3f7; }
+.btn.primary { background: #1a237e; border-color: #4fc3f7; color: #4fc3f7; }
+.btn.primary:hover { background: #283593; }
+
+/* ── 日志区 ── */
+.log-box {
+  background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 6px;
+  padding: 12px; font-family: monospace; font-size: 12px; color: #a0a0c0;
+  height: 120px; overflow-y: auto; white-space: pre-wrap;
+  display: none;
+}
+.log-box.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2>🤖 CCB 管理</h2>
+  <span class="badge" id="version-badge">加载中...</span>
+</div>
+
+<!-- 状态卡片 -->
+<div class="cards">
+  <div class="card">
+    <div class="label">CCB 状态</div>
+    <div class="value green" id="ccb-status">检查中...</div>
+  </div>
+  <div class="card">
+    <div class="label">当前任务</div>
+    <div class="value gray" id="task-status">无</div>
+  </div>
+  <div class="card">
+    <div class="label">执行步骤</div>
+    <div class="value gray" id="step-status">-</div>
+  </div>
+  <div class="card">
+    <div class="label">最后更新</div>
+    <div class="value gray" id="time-status">-</div>
+  </div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="actions">
+  <button class="btn primary" onclick="checkCCB()">🔄 刷新状态</button>
+  <button class="btn" onclick="showLog()">📋 查看日志</button>
+</div>
+
+<!-- 实时进度面板 -->
+<div class="progress-panel" id="progress-panel">
+  <h3>📊 实时进度</h3>
+  <div id="progress-idle">
+    <p style="color:#666; text-align:center; padding:20px;">当前没有执行中的任务</p>
+  </div>
+  <div id="progress-active" style="display:none;">
+    <table class="progress-table">
+      <tr><td>任务</td><td id="p-task">-</td></tr>
+      <tr><td>步骤</td><td id="p-step">-</td></tr>
+      <tr><td>状态</td><td id="p-status">-</td></tr>
+      <tr><td>开始</td><td id="p-start">-</td></tr>
+      <tr><td>用时</td><td id="p-duration">-</td></tr>
+    </table>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Remote Control -->
+<div class="remote-section">
+  <div class="remote-header">
+    <h3>🖥️ CCB Remote Control</h3>
+    <span class="setup-link" onclick="openSetup()">如何配置企业模式?</span>
+  </div>
+  <div id="remote-container">
+    <div class="remote-placeholder" id="remote-placeholder">
+      <div class="big-icon">🔗</div>
+      <div>CCB 企业模式尚未配置</div>
+      <div class="tip">需在 claude-code-best 容器中启用 Remote Control 后,<br>此区域将显示 CCB 会话管理界面</div>
+    </div>
+  </div>
+</div>
+
+<!-- 日志 -->
+<div class="log-box" id="log-box"></div>
+
+<script>
+const CCB_PROGRESS_URL = "/api/ccb-progress";
+
+function $(id) { return document.getElementById(id); }
+
+// 刷新状态
+async function checkCCB() {
+  try {
+    // 版本
+    let r = await fetch(CCB_PROGRESS_URL + "/version");
+    let v = await r.json();
+    $("version-badge").textContent = "v" + v.version;
+
+    // 进度
+    r = await fetch(CCB_PROGRESS_URL + "/status");
+    let s = await r.json();
+
+    if (s.status === "idle" || !s.task) {
+      $("ccb-status").textContent = "⏹ 空闲";
+      $("ccb-status").className = "value gray";
+      $("task-status").textContent = "无";
+      $("step-status").textContent = "-";
+      $("time-status").textContent = "-";
+      $("progress-idle").style.display = "block";
+      $("progress-active").style.display = "none";
+    } else {
+      $("ccb-status").textContent = "▶ 执行中";
+      $("ccb-status").className = "value green";
+      $("task-status").textContent = s.task;
+      $("step-status").textContent = s.step || "-";
+      $("time-status").textContent = s.updated_at || "-";
+
+      $("progress-idle").style.display = "none";
+      $("progress-active").style.display = "block";
+      $("p-task").textContent = s.task;
+      $("p-step").textContent = s.step || "-";
+      $("p-status").textContent = s.status || "-";
+      $("p-start").textContent = s.started_at || "-";
+      $("p-duration").textContent = s.duration || "-";
+      if (s.progress_pct) {
+        $("progress-fill").style.width = s.progress_pct + "%";
+      }
+    }
+  } catch (e) {
+    $("version-badge").textContent = "连接失败";
+    $("ccb-status").textContent = "⚠ 无法连接";
+    $("ccb-status").className = "value gray";
+  }
+}
+
+// 查看日志
+async function showLog() {
+  var box = $("log-box");
+  if (box.classList.contains("show")) {
+    box.classList.remove("show");
+    return;
+  }
+  box.classList.add("show");
+  box.textContent = "正在获取 CCB 日志...\n";
+  try {
+    let r = await fetch(CCB_PROGRESS_URL + "/status");
+    let s = await r.json();
+    box.textContent = "CCB 进度服务: 运行中\n";
+    box.textContent += "当前状态: " + (s.status || "idle") + "\n";
+    box.textContent += "最后更新: " + (s.updated_at || "-") + "\n";
+    box.textContent += "---\n";
+    box.textContent += "提示: 可在 claude-code-best 容器执行\n";
+    box.textContent += "  journalctl -u ccb* --no-pager -n 50\n";
+    box.textContent += "查看完整 CCB 日志\n";
+  } catch(e) {
+    box.textContent = "连接进度服务失败: " + e;
+  }
+}
+
+function openSetup() {
+  $("log-box").classList.add("show");
+  $("log-box").textContent = `CCB 企业模式 Remote Control 配置步骤:
+
+1. 进入 CCB 容器:
+   lxc exec claude-code-best bash
+
+2. 在 ~/.claude/settings.json 中启用远程控制:
+   添加 remote.enabled = true
+
+3. 启动远程控制服务:
+   ccb remote start --port 8443
+
+4. 配置完成后，访问 https://[容器IP]:8443
+
+5. 在总控台上方输入远程地址即可嵌入 iframe`;
+}
+
+// 每 10 秒自动刷新
+checkCCB();
+setInterval(checkCCB, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTN 总控台</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- 侧边栏 -->
+  <aside id="sidebar">
+    <div class="logo">NTN 总控台</div>
+    <nav>
+      <a href="#" class="nav-item active" data-page="hermes">
+        <span class="icon">💬</span>
+        <span class="label">Hermes</span>
+      </a>
+      <a href="#" class="nav-item" data-page="ccb">
+        <span class="icon">🤖</span>
+        <span class="label">CCB</span>
+      </a>
+      <a href="#" class="nav-item" data-page="sql-http">
+        <span class="icon">📋</span>
+        <span class="label">SQL-HTTP</span>
+      </a>
+      <a href="#" class="nav-item" data-page="mem">
+        <span class="icon">🧠</span>
+        <span class="label">MEM</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main id="content">
+    <iframe id="page-frame" src="pages/hermes.html"></iframe>
+  </main>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

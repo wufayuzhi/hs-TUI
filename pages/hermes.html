@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes - NTN 总控台</title>
+<link rel="stylesheet" href="../css/hermes.css">
+</head>
+<body>
+<div id="hermes-page">
+
+  <!-- 左侧：对话主面板 -->
+  <div id="chat-panel">
+    <div class="panel-header">
+      <h2>💬 对话</h2>
+      <span id="hermes-status" class="status-dot green">运行中</span>
+    </div>
+
+    <!-- 消息列表 -->
+    <div id="message-list">
+      <div class="msg msg-system">
+        <div class="msg-bubble">Hermes 已就绪，可以开始对话。</div>
+      </div>
+    </div>
+
+    <!-- 输入区 -->
+    <div id="input-area">
+      <textarea id="chat-input" rows="2" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"></textarea>
+      <button id="send-btn">发送</button>
+    </div>
+  </div>
+
+  <!-- 右侧：信息面板 -->
+  <div id="info-panel">
+    <!-- 企业微信状态 -->
+    <div class="info-section">
+      <h3>📱 企业微信</h3>
+      <div id="wecom-status" class="status-item">
+        <span class="status-dot gray"></span>
+        <span>未配置</span>
+      </div>
+      <button class="btn-sm" onclick="toggleWecomConfig()">配置</button>
+      <div id="wecom-config" class="config-form hidden">
+        <input type="text" id="corp-id" placeholder="Corp ID">
+        <input type="text" id="agent-id" placeholder="Agent ID">
+        <input type="password" id="wecom-secret" placeholder="Secret">
+        <input type="text" id="wecom-token" placeholder="Token">
+        <input type="text" id="wecom-aes" placeholder="EncodingAESKey">
+        <button class="btn-sm" onclick="saveWecom()">保存</button>
+      </div>
+    </div>
+
+    <!-- 系统状态 -->
+    <div class="info-section">
+      <h3>⚙️ 系统</h3>
+      <div id="sys-status">
+        <div class="info-row"><span>模型</span><span id="sys-model">-</span></div>
+        <div class="info-row"><span>版本</span><span id="sys-version">-</span></div>
+        <div class="info-row"><span>运行时间</span><span id="sys-uptime">-</span></div>
+      </div>
+    </div>
+
+    <!-- 最近会话 -->
+    <div class="info-section">
+      <h3>📋 最近会话</h3>
+      <div id="recent-sessions">
+        <div class="session-item empty">暂无会话</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/hermes.js"></script>
+</body>
+</html>
