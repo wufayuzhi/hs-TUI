@@ -6,17 +6,21 @@
 <title>Hermes - NTN 总控台</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; margin: 0; padding: 0; }
+html, body { height: 100%; margin: 0; }
 body {
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 14px; color: #e0e0e0; background: #1a1a2e; overflow: hidden;
+  font-size: 14px; color: #e0e0e0; background: #1a1a2e;
+  position: relative; overflow: hidden;
 }
-#hermes-page {
-  display: flex; height: 100%; overflow: hidden;
-}
+#hermes-page { display: flex; height: 100%; position: relative; }
+
+/* 对话面板 - 相对定位，为输入区留底部空间 */
 #chat-panel {
   flex: 1; display: flex; flex-direction: column; min-width: 0;
+  padding-bottom: 60px; /* 给输入区留位置 */
 }
+
+/* 顶部栏 */
 .panel-header {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px; background: #0f1a3a;
@@ -30,11 +34,13 @@ body {
 .status-dot.red { background: #f44336; }
 .status-text { font-size: 12px; color: #a0a0c0; white-space: nowrap; }
 
-/* 手机端信息抽屉 */
+/* 信息抽屉按钮 */
 #info-toggle {
   background: none; border: none; color: #a0a0c0; font-size: 20px;
-  cursor: pointer; padding: 6px 8px; border-radius: 6px; display: block; line-height: 1;
+  cursor: pointer; padding: 6px 8px; border-radius: 6px; line-height: 1;
 }
+
+/* 手机端信息抽屉 */
 #info-drawer {
   flex-shrink: 0; background: #16213e; border-bottom: 1px solid #2a2a4a;
   overflow-y: auto; max-height: 40vh;
@@ -45,20 +51,20 @@ body {
 #message-list {
   flex: 1; overflow-y: auto; padding: 12px 16px;
   display: flex; flex-direction: column; gap: 10px;
-  -webkit-overflow-scrolling: touch;
 }
 .msg { display: flex; }
 .msg-system { justify-content: center; }
 .msg-system .msg-bubble { background: #2a2a4a; color: #888; font-size: 12px; padding: 6px 14px; border-radius: 12px; max-width: 90%; }
 .msg-user { justify-content: flex-end; }
-.msg-user .msg-bubble { background: #0d47a1; color: #fff; max-width: 85%; padding: 10px 14px; border-radius: 14px 14px 4px 14px; line-height: 1.6; word-break: break-word; }
+.msg-user .msg-bubble { background: #0d47a1; color: #fff; max-width: 85%; padding: 10px 14px; border-radius: 14px 14px 4px 14px; line-height: 1.6; }
 .msg-assistant { justify-content: flex-start; }
-.msg-assistant .msg-bubble { background: #2a2a4a; color: #e0e0e0; max-width: 85%; padding: 10px 14px; border-radius: 14px 14px 14px 4px; line-height: 1.6; word-break: break-word; }
+.msg-assistant .msg-bubble { background: #2a2a4a; color: #e0e0e0; max-width: 85%; padding: 10px 14px; border-radius: 14px 14px 14px 4px; line-height: 1.6; }
 
-/* 输入区 */
+/* 输入区 - 绝对定位在底部 */
 #input-area {
+  position: absolute; bottom: 0; left: 0; right: 0;
   display: flex; gap: 8px; padding: 10px 12px;
-  border-top: 1px solid #2a2a4a; background: #0f1a3a; flex-shrink: 0;
+  background: #0f1a3a; border-top: 1px solid #2a2a4a; z-index: 10;
 }
 #chat-input {
   flex: 1; background: #1a1a3e; border: 1px solid #3a3a5a; border-radius: 8px;
@@ -74,12 +80,12 @@ body {
 /* 信息项通用 */
 .info-section { padding: 12px 16px; border-bottom: 1px solid #2a2a4a; }
 .info-section:last-child { border-bottom: none; }
-.info-section h3 { font-size: 12px; font-weight: 600; color: #a0a0c0; margin-bottom: 8px; letter-spacing: 0.5px; }
+.info-section h3 { font-size: 12px; font-weight: 600; color: #a0a0c0; margin-bottom: 8px; }
 .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 13px; }
 .info-label { color: #a0a0c0; }
 .info-value { color: #e0e0e0; text-align: right; }
 .info-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
-.btn-tiny { background: #2a2a4a; color: #e0e0e0; border: 1px solid #3a3a5a; border-radius: 5px; padding: 4px 12px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.btn-tiny { background: #2a2a4a; color: #e0e0e0; border: 1px solid #3a3a5a; border-radius: 5px; padding: 4px 12px; font-size: 11px; cursor: pointer; }
 .config-form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .config-form input { background: #1a1a3e; border: 1px solid #3a3a5a; border-radius: 5px; color: #e0e0e0; padding: 7px 10px; font-size: 12px; outline: none; }
 .hidden { display: none !important; }
@@ -93,11 +99,11 @@ body {
   background: #16213e; overflow-y: auto; display: none; flex-shrink: 0;
 }
 
-/* 响应式 */
+/* 桌面端 */
 @media (min-width: 900px) {
   #info-sidebar { display: block; }
-  #info-toggle { display: none; }
   #info-drawer { display: none !important; }
+  #chat-panel { padding-bottom: 64px; }
   .panel-header { padding: 14px 24px; }
   #message-list { padding: 16px 24px; }
   #input-area { padding: 12px 24px; }
@@ -151,12 +157,6 @@ body {
     <div id="message-list">
       <div class="msg msg-system"><div class="msg-bubble">Hermes 已就绪</div></div>
     </div>
-
-    <!-- 输入区 -->
-    <div id="input-area">
-      <textarea id="chat-input" rows="1" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"></textarea>
-      <button id="send-btn">发送</button>
-    </div>
   </div>
 
   <!-- 信息侧栏（桌面端） -->
@@ -191,23 +191,23 @@ body {
   </div>
 </div>
 
+<!-- 输入区 - 绝对定位在底部 -->
+<div id="input-area">
+  <textarea id="chat-input" rows="1" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"></textarea>
+  <button id="send-btn">发送</button>
+</div>
+
 <script>
 const API = '/api/hermes';
 
-// 初始化
 document.addEventListener('DOMContentLoaded', function() {
-  loadStatus();
-  loadSessions();
-  loadWecom();
+  loadStatus(); loadSessions(); loadWecom();
 
   var btn = document.getElementById('send-btn');
   var input = document.getElementById('chat-input');
 
   input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMsg();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
   });
   btn.addEventListener('click', sendMsg);
   input.addEventListener('input', function() {
@@ -224,15 +224,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function id(s) { return document.getElementById(s); }
+
 function sendMsg() {
   var input = id('chat-input');
   var text = input.value.trim();
   if (!text) return;
   appendMsg('user', text);
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
   setTimeout(function() { appendMsg('assistant', '收到：' + text); }, 200);
 }
+
 function appendMsg(role, text) {
   var div = document.createElement('div');
   div.className = 'msg msg-' + role;
@@ -243,86 +244,54 @@ function appendMsg(role, text) {
   id('message-list').appendChild(div);
   id('message-list').scrollTop = id('message-list').scrollHeight;
 }
-function setT(id, v) { var e = document.getElementById(id); if (e) e.textContent = v || '-'; }
-function setH(id, h) { var e = document.getElementById(id); if (e) e.innerHTML = h; }
 
-// 状态
+function setT(i, v) { var e = document.getElementById(i); if (e) e.textContent = v || '-'; }
+function setH(i, h) { var e = document.getElementById(i); if (e) e.innerHTML = h; }
+
 function loadStatus() {
-  fetch(API + '/status')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      setT('sys-model', d.model);
-      setT('sys-version', d.version);
-      setT('sys-uptime', fmtUptime(d.uptime_seconds));
-      setT('sys-model-d', d.model);
-      setT('sys-version-d', d.version);
-      setT('sys-uptime-d', fmtUptime(d.uptime_seconds));
-      var cls = d.gateway_running ? 'green' : 'gray';
-      var txt = d.gateway_running ? '运行中' : '未运行';
-      document.querySelectorAll('.status-dot').forEach(function(s) { s.className = 'status-dot ' + cls; });
-      document.querySelectorAll('.status-text').forEach(function(s) { s.textContent = txt; });
-    })
-    .catch(function() {
-      document.querySelectorAll('.status-dot').forEach(function(s) { s.className = 'status-dot red'; });
-      document.querySelectorAll('.status-text').forEach(function(s) { s.textContent = '无法连接'; });
-    });
+  fetch(API + '/status').then(function(r){return r.json()}).then(function(d) {
+    setT('sys-model', d.model); setT('sys-version', d.version);
+    setT('sys-uptime', fmt(d.uptime_seconds));
+    setT('sys-model-d', d.model); setT('sys-version-d', d.version); setT('sys-uptime-d', fmt(d.uptime_seconds));
+    var c = d.gateway_running ? 'green' : 'gray', t = d.gateway_running ? '运行中' : '未运行';
+    document.querySelectorAll('.status-dot').forEach(function(s){s.className='status-dot '+c;});
+    document.querySelectorAll('.status-text').forEach(function(s){s.textContent=t;});
+  }).catch(function() {
+    document.querySelectorAll('.status-dot').forEach(function(s){s.className='status-dot red';});
+    document.querySelectorAll('.status-text').forEach(function(s){s.textContent='无法连接';});
+  });
 }
 
-// 会话
 function loadSessions() {
-  fetch(API + '/sessions')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var html = (!d.sessions || d.sessions.length === 0)
-        ? '<div class="session-item empty">暂无会话</div>'
-        : d.sessions.slice(0, 8).map(function(s) {
-            return '<div class="session-item"><div class="session-title">' + (s.title || '未命名') + '</div><div class="session-time">' + (s.source_platform || '') + (s.message_count ? ' · ' + s.message_count + ' 条' : '') + '</div></div>';
-          }).join('');
-      setH('sessions-list', html);
-      setH('sessions-list-d', html);
-    })
-    .catch(function() {});
+  fetch(API + '/sessions').then(function(r){return r.json()}).then(function(d) {
+    var h = (!d.sessions||d.sessions.length===0)
+      ? '<div class="session-item empty">暂无会话</div>'
+      : d.sessions.slice(0,8).map(function(s){return '<div class="session-item"><div class="session-title">'+(s.title||'未命名')+'</div><div class="session-time">'+(s.source_platform||'')+(s.message_count?' · '+s.message_count+' 条':'')+'</div></div>';}).join('');
+    setH('sessions-list', h); setH('sessions-list-d', h);
+  }).catch(function(){});
 }
 
-// 企业微信
 function loadWecom() {
-  fetch(API + '/messaging/platforms')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var w = d.platforms ? d.platforms.find(function(p) { return p.id === 'wecom' || p.name === '企业微信' || p.id === 'wechat_work'; }) : null;
-      var h = w && w.connected ? '<span class="status-dot green"></span><span>已连接</span>'
-            : (w && w.enabled ? '<span class="status-dot gray"></span><span>已配置未连接</span>'
-            : '<span class="status-dot gray"></span><span>未配置</span>');
-      setH('wecom-status', h);
-      setH('wecom-status-d', h);
-    })
-    .catch(function() {});
+  fetch(API + '/messaging/platforms').then(function(r){return r.json()}).then(function(d) {
+    var w = d.platforms ? d.platforms.find(function(p){return p.id==='wecom'||p.name==='企业微信'||p.id==='wechat_work';}) : null;
+    var h = w&&w.connected ? '<span class="status-dot green"></span><span>已连接</span>' : (w&&w.enabled ? '<span class="status-dot gray"></span><span>已配置未连接</span>' : '<span class="status-dot gray"></span><span>未配置</span>');
+    setH('wecom-status', h); setH('wecom-status-d', h);
+  }).catch(function(){});
 }
 
 function toggleWecomConfig() { id('wecom-form').classList.toggle('hidden'); }
 function toggleWecomConfigD() { id('wecom-form-d').classList.toggle('hidden'); }
-function saveWecom(corpId,agentId,secret,token,aes) {
-  if (!corpId || !secret) { alert('Corp ID 和 Secret 必填'); return; }
-  fetch(API + '/messaging/platforms/wecom', {
-    method: 'PUT', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({enabled:true, env:{WECOM_CORP_ID:corpId,WECOM_AGENT_ID:agentId,WECOM_SECRET:secret,WECOM_TOKEN:token,WECOM_AES_KEY:aes}})
-  }).then(function(r) {
-    if (r.ok) { alert('已保存'); id('wecom-form').classList.add('hidden'); id('wecom-form-d').classList.add('hidden'); loadWecom(); }
-    else { r.text().then(function(t) { alert('失败: ' + t); }); }
-  }).catch(function(e) { alert('失败: ' + e.message); });
-}
-function saveWecomConfig() {
-  saveWecom(id('corp-id').value, id('agent-id').value, id('wecom-secret').value, id('wecom-token').value, id('wecom-aes').value);
-}
-function saveWecomConfigD() {
-  saveWecom(id('corp-id-d').value, id('agent-id-d').value, id('secret-d').value, id('token-d').value, id('aes-d').value);
-}
 
-function fmtUptime(s) {
-  if (!s) return null;
-  var d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
-  return (d > 0 ? d + '天' : '') + (h > 0 ? h + '时' : '') + m + '分';
+function saveWecom(c,a,s,t,k) {
+  if(!c||!s){alert('Corp ID 和 Secret 必填');return;}
+  fetch(API+'/messaging/platforms/wecom',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:true,env:{WECOM_CORP_ID:c,WECOM_AGENT_ID:a,WECOM_SECRET:s,WECOM_TOKEN:t,WECOM_AES_KEY:k}})})
+  .then(function(r){if(r.ok){alert('已保存');id('wecom-form').classList.add('hidden');id('wecom-form-d').classList.add('hidden');loadWecom();}else{r.text().then(function(t){alert('失败: '+t);});}})
+  .catch(function(e){alert('失败: '+e.message);});
 }
+function saveWecomConfig() { saveWecom(id('corp-id').value,id('agent-id').value,id('wecom-secret').value,id('wecom-token').value,id('wecom-aes').value); }
+function saveWecomConfigD() { saveWecom(id('corp-id-d').value,id('agent-id-d').value,id('secret-d').value,id('token-d').value,id('aes-d').value); }
+
+function fmt(s){if(!s)return null;var d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60);return(d>0?d+'天':'')+(h>0?h+'时':'')+m+'分';}
 </script>
 </body>
 </html>
