@@ -1,5 +1,6 @@
 /* ── Hermes 页面逻辑 ── */
-var API_BASE = 'http://127.0.0.1:9119';
+/* API 走代理：相对路径，自动通过 proxy.py 转发到后端 */
+var API_BASE = '';
 
 // DOM 引用
 var msgList   = document.getElementById('message-list');
@@ -7,6 +8,9 @@ var chatInput = document.getElementById('chat-input');
 var sendBtn   = document.getElementById('send-btn');
 var infoToggle = document.getElementById('info-toggle');
 var infoDrawer = document.getElementById('info-drawer');
+
+var HERMES_URL = API_BASE + '/api/hermes';
+var MESSAGING_URL = API_BASE + '/api/hermes';
 
 /* ── 辅助：判断是否为移动端（不含右侧侧栏） ── */
 function isMobile() { return window.innerWidth < 900; }
@@ -65,7 +69,7 @@ function sendMessage() {
   sendBtn.disabled = true;
   sendBtn.textContent = '发送中...';
 
-  // 临时回复（后续可接真实 WebSocket）
+  // 临时本地回复
   setTimeout(function () {
     appendMessage('assistant', '收到：' + text);
     sendBtn.disabled = false;
@@ -99,7 +103,7 @@ function setHTML(id, html) {
 
 /* ── 加载系统状态 ── */
 function loadStatus() {
-  fetch(API_BASE + '/api/status')
+  fetch(HERMES_URL + '/status')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       setText('sys-model', data.model);
@@ -126,7 +130,7 @@ function loadStatus() {
 
 /* ── 加载最近会话 ── */
 function loadSessions() {
-  fetch(API_BASE + '/api/sessions')
+  fetch(HERMES_URL + '/sessions')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var html = '';
@@ -148,7 +152,7 @@ function loadSessions() {
 
 /* ── 加载企业微信状态 ── */
 function loadWecomStatus() {
-  fetch(API_BASE + '/api/messaging/platforms')
+  fetch(HERMES_URL + '/messaging/platforms')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var wecom = data.platforms ? data.platforms.find(function (p) {
@@ -184,7 +188,7 @@ function saveWecom() {
 
   if (!corpId || !secret) { alert('Corp ID 和 Secret 必填'); return; }
 
-  fetch(API_BASE + '/api/messaging/platforms/wecom', {
+  fetch(HERMES_URL + '/messaging/platforms/wecom', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -215,7 +219,7 @@ function saveWecomDesktop() {
 
   if (!corpId || !secret) { alert('Corp ID 和 Secret 必填'); return; }
 
-  fetch(API_BASE + '/api/messaging/platforms/wecom', {
+  fetch(HERMES_URL + '/messaging/platforms/wecom', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
