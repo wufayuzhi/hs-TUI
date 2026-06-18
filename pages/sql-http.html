@@ -86,6 +86,28 @@ h2 { color: #4fc3f7; font-size: 20px; margin-bottom: 20px; }
 .modal-close:hover { border-color: #4fc3f7; color: #e0e0e0; }
 
 .loading { text-align: center; padding: 40px; color: #666; }
+
+/* ── 手机端适配 ── */
+@media (max-width: 768px) {
+  body { padding: 12px; }
+  h2 { font-size: 17px; margin-bottom: 14px; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .card { padding: 10px; }
+  .card .value { font-size: 15px; }
+  .filters { flex-wrap: wrap; }
+  .filters select { flex: 1; min-width: 0; }
+  .status-bar { margin-left: 0; }
+  .task-hdr, .task-row {
+    grid-template-columns: 50px 1fr 70px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .task-hdr span:nth-child(4),
+  .task-hdr span:nth-child(5),
+  .task-row span:nth-child(4),
+  .task-row span:nth-child(5) { display: none; }
+  .modal { width: 95%; padding: 16px; }
+}
 </style>
 </head>
 <body>

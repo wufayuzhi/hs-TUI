@@ -117,8 +117,9 @@ body {
 .idle-box .big-icon { font-size: 40px; opacity: 0.3; margin-bottom: 8px; }
 
 /* ── 手机端适配 ── */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   body { padding: 12px; }
+  .header h2 { font-size: 17px; }
   .cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .card { padding: 10px; }
   .card .value { font-size: 13px; }
@@ -126,6 +127,9 @@ body {
   .tab { border-right: none; border-bottom: 1px solid #2a2a4a; }
   .tab:last-child { border-bottom: none; }
   .progress-panel { padding: 14px; }
+  .remote-placeholder { padding: 24px 16px; }
+  .actions { gap: 6px; }
+  .actions .btn { font-size: 12px; padding: 6px 12px; }
 }
 </style>
 </head>

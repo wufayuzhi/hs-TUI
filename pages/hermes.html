@@ -7,63 +7,112 @@
 <link rel="stylesheet" href="../css/hermes.css">
 </head>
 <body>
+
 <div id="hermes-page">
 
-  <!-- 左侧：对话主面板 -->
+  <!-- 对话主面板 (全宽) -->
   <div id="chat-panel">
+    <!-- 头部 -->
     <div class="panel-header">
       <h2>💬 对话</h2>
-      <span id="hermes-status" class="status-dot green">运行中</span>
+      <span id="hermes-status" class="status-dot green"></span>
+      <span id="status-text" class="status-text">运行中</span>
+      <div class="header-spacer"></div>
+      <!-- 信息面板切换按钮 (手机端显示) -->
+      <button id="info-toggle" class="btn-icon" title="信息面板">☰</button>
+    </div>
+
+    <!-- 信息面板 (手机端可折叠抽屉) -->
+    <div id="info-drawer" class="hidden">
+      <!-- 企业微信状态 -->
+      <div class="info-section">
+        <h3>📱 企业微信</h3>
+        <div class="info-row">
+          <span id="wecom-status">
+            <span class="status-dot gray"></span>
+            <span>未配置</span>
+          </span>
+          <button class="btn-tiny" onclick="toggleWecomConfig()">配置</button>
+        </div>
+        <div id="wecom-config" class="config-form hidden">
+          <input type="text" id="corp-id" placeholder="Corp ID">
+          <input type="text" id="agent-id" placeholder="Agent ID">
+          <input type="password" id="wecom-secret" placeholder="Secret">
+          <input type="text" id="wecom-token" placeholder="Token">
+          <input type="text" id="wecom-aes" placeholder="EncodingAESKey">
+          <button class="btn-tiny" onclick="saveWecom()">保存</button>
+        </div>
+      </div>
+
+      <!-- 系统状态 -->
+      <div class="info-section">
+        <h3>⚙️ 系统状态</h3>
+        <div class="info-grid">
+          <div class="info-label">模型</div><div class="info-value" id="sys-model">-</div>
+          <div class="info-label">版本</div><div class="info-value" id="sys-version">-</div>
+          <div class="info-label">运行时间</div><div class="info-value" id="sys-uptime">-</div>
+        </div>
+      </div>
+
+      <!-- 最近会话 -->
+      <div class="info-section">
+        <h3>📋 最近会话</h3>
+        <div id="recent-sessions">
+          <div class="session-item empty">暂无会话</div>
+        </div>
+      </div>
     </div>
 
     <!-- 消息列表 -->
     <div id="message-list">
       <div class="msg msg-system">
-        <div class="msg-bubble">Hermes 已就绪，可以开始对话。</div>
+        <div class="msg-bubble">Hermes 已就绪</div>
       </div>
     </div>
 
     <!-- 输入区 -->
     <div id="input-area">
-      <textarea id="chat-input" rows="2" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"></textarea>
+      <textarea id="chat-input" rows="1" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"></textarea>
       <button id="send-btn">发送</button>
     </div>
   </div>
 
-  <!-- 右侧：信息面板 -->
-  <div id="info-panel">
-    <!-- 企业微信状态 -->
+  <!-- 右侧信息面板 (桌面端) -->
+  <div id="info-sidebar">
+    <!-- 企业微信 -->
     <div class="info-section">
       <h3>📱 企业微信</h3>
-      <div id="wecom-status" class="status-item">
-        <span class="status-dot gray"></span>
-        <span>未配置</span>
+      <div class="info-row">
+        <span id="wecom-status-desktop">
+          <span class="status-dot gray"></span>
+          <span>未配置</span>
+        </span>
+        <button class="btn-tiny" onclick="toggleWecomConfigDesktop()">配置</button>
       </div>
-      <button class="btn-sm" onclick="toggleWecomConfig()">配置</button>
-      <div id="wecom-config" class="config-form hidden">
-        <input type="text" id="corp-id" placeholder="Corp ID">
-        <input type="text" id="agent-id" placeholder="Agent ID">
-        <input type="password" id="wecom-secret" placeholder="Secret">
-        <input type="text" id="wecom-token" placeholder="Token">
-        <input type="text" id="wecom-aes" placeholder="EncodingAESKey">
-        <button class="btn-sm" onclick="saveWecom()">保存</button>
+      <div id="wecom-config-desktop" class="config-form hidden">
+        <input type="text" id="corp-id-d" placeholder="Corp ID">
+        <input type="text" id="agent-id-d" placeholder="Agent ID">
+        <input type="password" id="wecom-secret-d" placeholder="Secret">
+        <input type="text" id="wecom-token-d" placeholder="Token">
+        <input type="text" id="wecom-aes-d" placeholder="EncodingAESKey">
+        <button class="btn-tiny" onclick="saveWecomDesktop()">保存</button>
       </div>
     </div>
 
     <!-- 系统状态 -->
     <div class="info-section">
-      <h3>⚙️ 系统</h3>
-      <div id="sys-status">
-        <div class="info-row"><span>模型</span><span id="sys-model">-</span></div>
-        <div class="info-row"><span>版本</span><span id="sys-version">-</span></div>
-        <div class="info-row"><span>运行时间</span><span id="sys-uptime">-</span></div>
+      <h3>⚙️ 系统状态</h3>
+      <div class="info-grid">
+        <div class="info-label">模型</div><div class="info-value" id="sys-model-d">-</div>
+        <div class="info-label">版本</div><div class="info-value" id="sys-version-d">-</div>
+        <div class="info-label">运行时间</div><div class="info-value" id="sys-uptime-d">-</div>
       </div>
     </div>
 
     <!-- 最近会话 -->
     <div class="info-section">
       <h3>📋 最近会话</h3>
-      <div id="recent-sessions">
+      <div id="recent-sessions-desktop">
         <div class="session-item empty">暂无会话</div>
       </div>
     </div>
