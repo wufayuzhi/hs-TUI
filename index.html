@@ -7,11 +7,18 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <div id="app">
+
+  <!-- 遮罩层（手机端用） -->
+  <div id="overlay"></div>
 
   <!-- 侧边栏 -->
   <aside id="sidebar">
-    <div class="logo">NTN 总控台</div>
+    <div class="sidebar-header">
+      <div class="logo">NTN 总控台</div>
+      <button id="toggle-btn" title="收起/展开">☰</button>
+    </div>
     <nav>
       <a href="#" class="nav-item active" data-page="hermes">
         <span class="icon">💬</span>
@@ -34,6 +41,11 @@
 
   <!-- 主内容区 -->
   <main id="content">
+    <!-- 顶部栏（手机端显示） -->
+    <div id="topbar">
+      <button id="menu-btn">☰</button>
+      <span id="topbar-title">NTN 总控台</span>
+    </div>
     <iframe id="page-frame" src="pages/hermes.html"></iframe>
   </main>
 
