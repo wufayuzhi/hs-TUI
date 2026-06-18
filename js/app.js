@@ -9,27 +9,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const pageNames = { hermes: 'Hermes', ccb: 'CCB', 'sql-http': 'SQL-HTTP', mem: 'MEM' };
 
-  // ————— 切换页面 —————
+  // ————— 页面切换 —————
   function switchPage(page) {
     navItems.forEach(function (item) {
       item.classList.toggle('active', item.dataset.page === page);
     });
     frame.src = 'pages/' + page + '.html';
-    topbarTitle.textContent = 'NTN 总控台 — ' + (pageNames[page] || page);
+    topbarTitle.textContent = pageNames[page] || page;
 
-    // 手机端切换后自动关侧边栏
+    // 手机端：切换后自动关闭侧边栏
     if (window.innerWidth <= 768) {
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
     }
   }
 
-  // ————— 侧边栏折叠（桌面端） —————
+  // ————— 桌面端：折叠/展开 —————
   toggleBtn.addEventListener('click', function () {
     sidebar.classList.toggle('collapsed');
   });
 
-  // ————— 侧边栏打开/关闭（手机端） —————
+  // ————— 手机端：打开/关闭菜单 —————
   menuBtn.addEventListener('click', function () {
     sidebar.classList.toggle('open');
     overlay.classList.toggle('show');
@@ -50,17 +50,25 @@ document.addEventListener('DOMContentLoaded', function () {
   // ————— 窗口尺寸变化 —————
   function handleResize() {
     if (window.innerWidth > 768) {
-      // 桌面端：确保侧边栏可见，移除手机状态
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
-    } else {
-      // 手机端：展开侧边栏（如果是折叠状态）
-      sidebar.classList.remove('collapsed');
     }
   }
   window.addEventListener('resize', handleResize);
 
-  // ————— 启动加载 —————
+  // ————— 记忆侧边栏状态 —————
+  var savedCollapsed = localStorage.getItem('sidebarCollapsed');
+  if (savedCollapsed === 'true' && window.innerWidth > 768) {
+    sidebar.classList.add('collapsed');
+  }
+  var origToggle = toggleBtn.addEventListener;
+  toggleBtn.addEventListener('click', function () {
+    setTimeout(function () {
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }, 50);
+  });
+
+  // ————— 启动 ────
   switchPage('hermes');
   handleResize();
 });
