@@ -9,20 +9,14 @@ import http.server
 import urllib.request
 import urllib.error
 
-STATIC_DIR = "/mnt/shared/code/ntn-dashboard"
+STATIC_DIR = os.environ.get("STATIC_DIR", "/app")
 MEM_URL = "http://10.69.68.143:8081"
 SQL_URL = "http://10.69.68.186:8080"
 CCB_URL = "http://10.69.68.39:9099"
 HERMES_URL = "http://127.0.0.1:9119"
 
-# Read SQL token from the running process
-token = ""
-with open("/proc/28021/environ", "rb") as f:
-    data = f.read()
-for entry in data.split(b"\0"):
-    if entry.startswith(b"NTN_SQL_HTTP_TOKEN="):
-        token = entry.split(b"=", 1)[1].decode()
-        break
+# Read SQL token from environment variable
+token = os.environ.get("NTN_SQL_HTTP_TOKEN", "")
 
 def do_proxy(method, base, path, body=None):
     url = base + path
