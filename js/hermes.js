@@ -1,6 +1,6 @@
 /* ── Hermes 页面逻辑 ── */
-/* API 走代理：相对路径，自动通过 proxy.py 转发到后端 */
-var API_BASE = '';
+/* API 走代理：所有请求通过 proxy.py 转发到 Hermes Dashboard */
+const API_PREFIX = '/api/hermes';
 
 // DOM 引用
 var msgList   = document.getElementById('message-list');
@@ -8,9 +8,6 @@ var chatInput = document.getElementById('chat-input');
 var sendBtn   = document.getElementById('send-btn');
 var infoToggle = document.getElementById('info-toggle');
 var infoDrawer = document.getElementById('info-drawer');
-
-var HERMES_URL = API_BASE + '/api/hermes';
-var MESSAGING_URL = API_BASE + '/api/hermes';
 
 /* ── 辅助：判断是否为移动端（不含右侧侧栏） ── */
 function isMobile() { return window.innerWidth < 900; }
@@ -69,9 +66,9 @@ function sendMessage() {
   sendBtn.disabled = true;
   sendBtn.textContent = '发送中...';
 
-  // 临时本地回复
+  // 临时回复（后续可接真实 WebSocket）
   setTimeout(function () {
-    appendMessage('assistant', '收到：' + text);
+    appendMessage('assistant', '已收到：' + text);
     sendBtn.disabled = false;
     sendBtn.textContent = '发送';
   }, 300);
@@ -103,7 +100,7 @@ function setHTML(id, html) {
 
 /* ── 加载系统状态 ── */
 function loadStatus() {
-  fetch(HERMES_URL + '/status')
+  fetch(API_PREFIX + '/status')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       setText('sys-model', data.model);
@@ -120,7 +117,8 @@ function loadStatus() {
       var statusTexts = document.querySelectorAll('#status-text, #status-text-d');
       statusTexts.forEach(function (t) { if (t) t.textContent = txt; });
     })
-    .catch(function () {
+    .catch(function (err) {
+      console.error('状态加载失败:', err);
       var dots = document.querySelectorAll('#hermes-status, #hermes-status-d');
       dots.forEach(function (d) { d.className = 'status-dot red'; });
       var statusTexts = document.querySelectorAll('#status-text, #status-text-d');
@@ -130,7 +128,7 @@ function loadStatus() {
 
 /* ── 加载最近会话 ── */
 function loadSessions() {
-  fetch(HERMES_URL + '/sessions')
+  fetch(API_PREFIX + '/sessions')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var html = '';
@@ -147,12 +145,14 @@ function loadSessions() {
       setHTML('recent-sessions', html);
       setHTML('recent-sessions-desktop', html);
     })
-    .catch(function () {});
+    .catch(function (err) {
+      console.error('会话加载失败:', err);
+    });
 }
 
 /* ── 加载企业微信状态 ── */
 function loadWecomStatus() {
-  fetch(HERMES_URL + '/messaging/platforms')
+  fetch(API_PREFIX + '/messaging/platforms')
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var wecom = data.platforms ? data.platforms.find(function (p) {
@@ -170,7 +170,9 @@ function loadWecomStatus() {
       setHTML('wecom-status', html);
       setHTML('wecom-status-desktop', html);
     })
-    .catch(function () {});
+    .catch(function (err) {
+      console.error('微信状态加载失败:', err);
+    });
 }
 
 /* ── 企业微信配置（移动端） ── */
@@ -188,7 +190,7 @@ function saveWecom() {
 
   if (!corpId || !secret) { alert('Corp ID 和 Secret 必填'); return; }
 
-  fetch(HERMES_URL + '/messaging/platforms/wecom', {
+  fetch(API_PREFIX + '/messaging/platforms/wecom', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -219,7 +221,7 @@ function saveWecomDesktop() {
 
   if (!corpId || !secret) { alert('Corp ID 和 Secret 必填'); return; }
 
-  fetch(HERMES_URL + '/messaging/platforms/wecom', {
+  fetch(API_PREFIX + '/messaging/platforms/wecom', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
