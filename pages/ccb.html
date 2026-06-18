@@ -92,11 +92,22 @@ body {
 /* ── 日志区 ── */
 .log-box {
   background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 6px;
-  padding: 12px; font-family: monospace; font-size: 12px; color: #a0a0c0;
-  height: 120px; overflow-y: auto; white-space: pre-wrap;
-  display: none;
+  display: none; flex-direction: column; margin-bottom: 20px;
+  max-height: 500px;
 }
-.log-box.show { display: block; }
+.log-box.show { display: flex; }
+.log-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; border-bottom: 1px solid #2a2a4a;
+  font-size: 12px; color: #a0a0c0; background: #0f0f20;
+}
+.log-meta { color: #666; font-size: 11px; }
+#log-content {
+  padding: 10px 14px; font-family: "Menlo", "Consolas", monospace;
+  font-size: 12px; line-height: 1.6; color: #a0c0e0;
+  overflow: auto; max-height: 460px; white-space: pre-wrap;
+  word-break: break-all; margin: 0;
+}
 </style>
 </head>
 <body>
@@ -167,8 +178,13 @@ body {
   </div>
 </div>
 
-<!-- 日志 -->
-<div class="log-box" id="log-box"></div>
+<div class="log-box" id="log-box">
+  <div class="log-header">
+    <span>实时执行日志</span>
+    <span class="log-meta" id="log-meta"></span>
+  </div>
+  <pre id="log-content">等待日志...</pre>
+</div>
 
 <script>
 const CCB_PROGRESS_URL = "/api/ccb-progress";
@@ -220,49 +236,55 @@ async function checkCCB() {
   }
 }
 
-// 查看日志
+// 自动轮询日志（3 秒）
+var logTimer = null;
+var isLogVisible = false;
+
+async function fetchLog() {
+  try {
+    let r = await fetch(CCB_PROGRESS_URL + "/log?lines=100");
+    let data = await r.json();
+    var content = $("log-content");
+    content.textContent = data.log || "[空]";
+    $("log-meta").textContent = "共 " + data.total_lines + " 行 | " + data.files.length + " 个日志文件";
+    content.scrollTop = content.scrollHeight;
+  } catch(e) {
+    $("log-content").textContent = "拉取日志失败: " + e.message;
+  }
+}
+
+// 查看日志（切换显示/隐藏）
 async function showLog() {
   var box = $("log-box");
   if (box.classList.contains("show")) {
     box.classList.remove("show");
+    if (logTimer) { clearInterval(logTimer); logTimer = null; }
     return;
   }
   box.classList.add("show");
-  box.textContent = "正在获取 CCB 日志...\n";
-  try {
-    let r = await fetch(CCB_PROGRESS_URL + "/status");
-    let s = await r.json();
-    box.textContent = "CCB 进度服务: 运行中\n";
-    box.textContent += "当前状态: " + (s.status || "idle") + "\n";
-    box.textContent += "最后更新: " + (s.updated_at || "-") + "\n";
-    box.textContent += "---\n";
-    box.textContent += "提示: 可在 claude-code-best 容器执行\n";
-    box.textContent += "  journalctl -u ccb* --no-pager -n 50\n";
-    box.textContent += "查看完整 CCB 日志\n";
-  } catch(e) {
-    box.textContent = "连接进度服务失败: " + e;
-  }
+  $("log-content").textContent = "正在获取 CCB 实时日志...";
+  await fetchLog();
+  if (logTimer) clearInterval(logTimer);
+  logTimer = setInterval(fetchLog, 3000);
 }
 
 function openSetup() {
   $("log-box").classList.add("show");
-  $("log-box").textContent = `CCB 企业模式 Remote Control 配置步骤:
+  $("log-content").textContent =
+`CCB 企业模式 Remote Control 配置步骤:
 
 1. 进入 CCB 容器:
    lxc exec claude-code-best bash
 
-2. 在 ~/.claude/settings.json 中启用远程控制:
-   添加 remote.enabled = true
+2. 启动 CCB 任务时自动捕获日志
 
-3. 启动远程控制服务:
-   ccb remote start --port 8443
+3. 总控台每 3 秒拉取一次实时日志
 
-4. 配置完成后，访问 https://[容器IP]:8443
-
-5. 在总控台上方输入远程地址即可嵌入 iframe`;
+提示: 如需更详细的输出，可以在 CCB 容器中运行:
+   tail -f /tmp/ccb-*.out`;
 }
 
-// 每 10 秒自动刷新
+// 每 10 秒自动刷新状态
 checkCCB();
 setInterval(checkCCB, 10000);
 </script>
