@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+<head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>Hermes 配置</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;color:#e0e0e0;background:#16213e}
+body{padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.sec{background:#0f1a3a;border:1px solid #2a2a4a;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.sh h3{font-size:13px;font-weight:600;color:#a0a0c0}
+.sh .ar{font-size:12px;color:#666;transition:transform .2s}
+.sh.op .ar{transform:rotate(180deg)}
+.sc{padding:0 14px 12px;display:none}
+.sc.op{display:block}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg select,.fg input{width:100%;background:#1a1a3e;border:1px solid #3a3a5a;border-radius:6px;color:#e0e0e0;padding:8px 10px;font-size:13px;outline:none}
+.fg select:focus,.fg input:focus{border-color:#4fc3f7}
+.fg select{appearance:auto;cursor:pointer}
+.ag{display:flex;gap:6px;margin-top:6px}
+.bt{background:#2a2a4a;color:#e0e0e0;border:1px solid #3a3a5a;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;flex:1;text-align:center;font-family:inherit}
+.bt:active{background:#3a3a5a}
+.bt-p{background:#0d47a1;border-color:#1565c0;color:#fff}
+.bt-g{background:#1b5e20;border-color:#2e7d32;color:#fff}
+.rs{margin-top:6px;padding:6px 10px;border-radius:4px;font-size:12px;line-height:1.4;display:none}
+.rs.i{display:block;background:#1a3a5a;color:#64b5f6}
+.rs.s{display:block;background:#1a3a2a;color:#81c784}
+.rs.w{display:block;background:#3a3a1a;color:#ffd54f}
+.rs.e{display:block;background:#3a1a1a;color:#e57373}
+.hn{font-size:11px;color:#666;margin-top:4px}
+.sg{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}
+.sg .l{color:#a0a0c0;white-space:nowrap}
+.sg .v{color:#e0e0e0;text-align:right;word-break:break-all}
+.ok{color:#4caf50}.off{color:#f44336}.gray{color:#666}
+</style>
+</head>
+<body>
+
+<!-- 模型配置 - 默认折叠 -->
+<div class=sec>
+  <div class="sh" onclick=cf('smc')>
+    <h3>🤖 模型配置</h3><span class=ar>▼</span>
+  </div>
+  <div id=smc class=sc>
+    <div class=fg>
+      <select id=pr onchange="document.getElementById('bu').value=URLS[this.value]||''">
+        <option value="">-- Provider --</option>
+        <option value=deepseek>DeepSeek</option>
+        <option value=openrouter>OpenRouter</option>
+        <option value=openai>OpenAI</option>
+        <option value=anthropic>Anthropic</option>
+        <option value=google>Google/Gemini</option>
+        <option value=glm>智谱 GLM</option>
+        <option value=kimi>Kimi/Moonshot</option>
+        <option value=minimax>MiniMax</option>
+        <option value=xai>xAI/Grok</option>
+        <option value=huggingface>HuggingFace</option>
+        <option value=novita>NovitaAI</option>
+      </select>
+      <input type=text id=md placeholder="模型名 (如 deepseek-chat)">
+      <input type=text id=bu placeholder="API 地址 (选填 - 自动填充)">
+      <input type=password id=ak placeholder="API Key">
+    </div>
+    <div class=ag>
+      <button class="bt bt-g" onclick=tst()>🔍 测试连接</button>
+      <button class="bt bt-p" onclick=svm()>💾 保存</button>
+    </div>
+    <div id=rm class=rs></div>
+    <div class=hn>⚠️ 保存后需重启新会话生效</div>
+  </div>
+</div>
+
+<!-- 企业微信配置 - 默认折叠 -->
+<div class=sec>
+  <div class="sh" onclick=cf('wwc')>
+    <h3>📱 企业微信</h3><span class=ar>▼</span>
+  </div>
+  <div id=wwc class=sc>
+    <div class=fg>
+      <input type=text id=cp placeholder="Corp ID">
+      <input type=text id=ag placeholder="Agent ID">
+      <input type=password id=sc placeholder="Secret">
+      <input type=text id=tk placeholder="Token (可选)">
+      <input type=text id=ae placeholder="EncodingAESKey (可选)">
+    </div>
+    <div class=ag>
+      <button class="bt bt-p" onclick=svw()>💾 保存</button>
+    </div>
+    <div id=rw class=rs></div>
+  </div>
+</div>
+
+<!-- 系统状态 - 默认展开 -->
+<div class=sec>
+  <div class="sh op" onclick=cf('sys')>
+    <h3>⚙️ 系统状态</h3><span class=ar>▼</span>
+  </div>
+  <div id=sys class="sc op">
+    <div class=sg>
+      <div class=l>模型</div><div class=v id=s_model><span class=gray>未设置</span></div>
+      <div class=l>Provider</div><div class=v id=s_prov><span class=gray>未设置</span></div>
+      <div class=l>版本</div><div class=v id=s_ver>-</div>
+      <div class=l>运行时间</div><div class=v id=s_upt>-</div>
+      <div class=l>网关</div><div class=v id=s_gw><span class=gray>检查中...</span></div>
+      <div class=l>企业微信</div><div class=v id=s_wx><span class=gray>检查中...</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const H='/api/hermes';
+const URLS={deepseek:'https://api.deepseek.com',openrouter:'https://openrouter.ai/api/v1',openai:'https://api.openai.com/v1',anthropic:'https://api.anthropic.com/v1',google:'https://generativelanguage.googleapis.com/v1beta/openai',glm:'https://api.z.ai/api/paas/v4',kimi:'https://api.moonshot.cn/v1',minimax:'https://api.minimax.io/v1',xai:'https://api.x.ai/v1',huggingface:'https://router.huggingface.co/hf/v1',novita:'https://api.novita.ai/openai/v1'}
+
+function $(i){return document.getElementById(i)}
+function gv(i){return $(i).value.trim()}
+function cf(id){
+  var e=$(id);
+  var h=e.parentElement.querySelector('.sh');
+  e.classList.toggle('op');
+  if(h)h.classList.toggle('op');
+}
+function sh(id,msg,tp){var e=$(id);if(!e)return;e.textContent=msg;e.className='rs '+tp}
+
+// 加载系统状态
+async function ld(){
+  $('s_model').innerHTML='<span class=gray>加载中...</span>';$('s_prov').innerHTML='<span class=gray>加载中...</span>';$('s_ver').textContent='-';$('s_upt').textContent='-';$('s_gw').innerHTML='<span class=gray>检查中...</span>';$('s_wx').innerHTML='<span class=gray>检查中...</span>'
+  // 健康检查 - 网关状态 + 版本
+  try{
+    var r=await fetch(H+'/health');var d=await r.json()
+    $('s_gw').innerHTML=d.status==='ok'?'<span class=ok>运行中</span>':'<span class=off>离线</span>'
+    $('s_ver').textContent=d.version||'-'
+  }catch(e){$('s_gw').innerHTML='<span class=off>离线</span>'}
+  // 模型列表 - 获取当前模型
+  try{
+    var r=await fetch(H+'/v1/models',{headers:{'Authorization':'Bearer webchat-key-1781853969'}});var d=await r.json()
+    if(d.data&&d.data.length){var m=d.data[0];$('s_model').innerHTML=m.id;var p=(m.id.split('-')[0]||'deepseek');$('s_prov').innerHTML=p}
+  }catch(e){}
+  // 企业微信 - 暂无独立端点
+  $('s_wx').innerHTML='<span class=gray>未启用</span>'
+}
+ld()
+
+// 测试连接
+async function tst(){var e=$('rm');e.className='rs i';e.textContent='连接中...';var p=$('pr').value;if(!p){e.className='rs w';e.textContent='请选择 Provider';return};var url=$('bu').value||URLS[p];var key=$('ak').value;if(!key){e.className='rs w';e.textContent='请输入 API Key';return}
+  try{var r=await fetch(url+'/models',{headers:{Authorization:'Bearer '+key}});if(r.ok){e.className='rs s';e.textContent='✅ 连接成功！'}else{e.className='rs e';e.textContent='❌ 失败: '+r.status}}catch(ex){e.className='rs e';e.textContent='❌ 无法连接: '+ex.message}}
+
+// 保存模型配置
+async function svm(){var e=$('rm');e.className='rs w';e.textContent='⚠️ 保存功能暂未对接后端，请手动编辑 /home/ops/.hermes/config.yaml'}
+
+// 保存企业微信配置
+async function svw(){var e=$('rw');e.className='rs w';e.textContent='⚠️ 保存功能暂未对接后端，请手动编辑 /home/ops/.hermes/config.yaml'}
+</script>
+</body>
+</html>

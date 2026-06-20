@@ -1,56 +1,224 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh-CN>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>NTN 总控台</title>
-<link rel="stylesheet" href="css/style.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#16213e;overflow:hidden}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;color:#e0e0e0}
+#app{display:flex;flex-direction:column;height:100dvh;min-height:0}
+#topnav{display:flex;align-items:center;gap:2px;padding:8px 10px;background:#0f1a3a;border-bottom:1px solid #1e2d5a;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#topnav::-webkit-scrollbar{display:none}
+.ni{flex-shrink:0;display:inline-flex;align-items:center;gap:4px;padding:7px 10px;color:#8a9aba;text-decoration:none;border-radius:6px;font-size:13px;white-space:nowrap;transition:.15s}
+.ni.active{background:#1a3a7a;color:#fff}
+#dash{flex:1;overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:#0f1a3a;border:1px solid #1e2d5a;border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.card:active{background:#1a2a5a;border-color:#4fc3f7}
+.ci{font-size:24px;margin-bottom:4px}
+.cn{font-size:13px;color:#e0e0ff;font-weight:600}
+.cs{font-size:11px;color:#4fc3f7;margin-top:4px}
+.sys-title{font-size:13px;font-weight:600;color:#4fc3f7;margin-bottom:8px;margin-top:16px}
+.sys-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;padding:0 2px}
+.sys-label{color:#a0a0c0}
+.sys-value{color:#e0e0e0;text-align:right}
+#chat{display:none;flex:1;flex-direction:column;min-height:0}
+#chat-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#0f1a3a;border-bottom:1px solid #2a2a4a;flex-shrink:0}
+#chat-hdr h2{font-size:15px;font-weight:600;color:#4fc3f7;flex-shrink:0}
+#chat-msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:0;-webkit-overflow-scrolling:touch}
+#chat-ia{flex-shrink:0;display:flex;gap:6px;padding:8px 14px 10px;background:#0f1a3a;border-top:2px solid #4fc3f7;padding-bottom:max(10px,env(safe-area-inset-bottom,10px))}
+#chat-ci{flex:1;background:#1a1a3e;border:2px solid #4fc3f7;border-radius:8px;color:#e0e0e0;padding:9px 12px;font-size:16px;font-family:inherit;resize:none;outline:none;min-height:40px;max-height:100px;display:block}
+#chat-ci:focus{border-color:#29b6f6}
+#chat-sb{background:#4fc3f7;color:#1a1a2e;border:none;border-radius:8px;padding:10px 22px;font-size:15px;font-weight:700;cursor:pointer;flex-shrink:0}
+.msg{display:flex}
+.mu{justify-content:flex-end}.mu .b{background:#0d47a1;color:#fff;max-width:85%;padding:9px 13px;border-radius:14px 14px 4px 14px;line-height:1.5;font-size:13px;word-break:break-word}
+.ma{justify-content:flex-start}.ma .b{background:#2a2a4a;color:#e0e0e0;max-width:85%;padding:9px 13px;border-radius:14px 14px 14px 4px;line-height:1.5;font-size:13px;word-break:break-word}
+.hbtn{background:#1a2a5a;color:#90caf9;border:1px solid #2a4a7a;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s}
+.hbtn:hover{border-color:#4fc3f7;background:#1a3a7a}
+.hbtn.danger{border-color:#ef5350;color:#ef5350}
+.hbtn.danger:hover{background:#3a1a1a;border-color:#ff1744}
+.hist{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;justify-content:center;align-items:flex-start;padding-top:50px}
+.hist.show{display:flex}
+.hist-box{background:#16213e;border:1px solid #2a2a4a;border-radius:10px;width:90%;max-width:500px;max-height:70vh;display:flex;flex-direction:column}
+.hist-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #2a2a4a;flex-shrink:0}
+.hist-hdr h3{font-size:15px;color:#4fc3f7}
+.hist-close{background:none;border:none;color:#666;font-size:18px;cursor:pointer;padding:4px}
+.hist-close:hover{color:#e0e0e0}
+.hist-list{flex:1;overflow-y:auto;padding:8px}
+.hist-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:6px;cursor:pointer;border-bottom:1px solid #1a1a3e;transition:.1s}
+.hist-item:hover{background:#1a2a5a}
+.hist-item .h-title{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-item .h-time{font-size:11px;color:#666;flex-shrink:0}
+.hist-del{background:none;border:none;color:#666;font-size:14px;cursor:pointer;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.hist-del:hover{color:#ef5350;background:#3a1a1a}
+.hist-empty{text-align:center;padding:30px;color:#666;font-size:13px}
+#chtitle{font-size:12px;color:#a0a0c0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:4px}
+#page{display:none;flex:1;flex-direction:column;min-height:0}
+#page iframe{width:100%;flex:1;border:none;background:#16213e}
+@media(min-width:600px){.cards{grid-template-columns:repeat(3,1fr);max-width:700px;margin:0 auto}#topnav{justify-content:center;gap:6px;padding:10px 20px}.ni{padding:8px 16px;font-size:14px}#dash{padding:20px}}
+</style>
 </head>
 <body>
-
-<div id="app">
-
-  <!-- 遮罩层（手机端用） -->
-  <div id="overlay"></div>
-
-  <!-- 侧边栏 -->
-  <aside id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">NTN 总控台</div>
-      <button id="toggle-btn" title="收起/展开">☰</button>
+<div id=app>
+  <nav id=topnav>
+    <a href=# class="ni active" data-p=dash>🏠 仪表台</a>
+    <a href=# class=ni data-p=hermes>💬 对话</a>
+    <a href=# class=ni data-p=config>⚙️ 配置</a>
+    <a href=# class=ni data-p=ccb>🤖 ccb</a>
+    <a href=# class=ni data-p=sql>📋 sql_http</a>
+    <a href=# class=ni data-p=mem>🧠 mem</a>
+  </nav>
+  <div id=dash>
+    <div class=cards>
+      <div class=card data-p=dash><div class=ci>🏠</div><div class=cn>仪表台</div><div class=cs>总览</div></div>
+      <div class=card data-p=hermes><div class=ci>💬</div><div class=cn>对话</div><div class=cs id=ds-h>检查中...</div></div>
+      <div class=card data-p=config><div class=ci>⚙️</div><div class=cn>配置</div><div class=cs id=ds-cfg>检查中...</div></div>
+      <div class=card data-p=ccb><div class=ci>🤖</div><div class=cn>ccb</div><div class=cs id=ds-c>检查中...</div></div>
+      <div class=card data-p=sql><div class=ci>📋</div><div class=cn>sql_http</div><div class=cs id=ds-s>检查中...</div></div>
+      <div class=card data-p=mem><div class=ci>🧠</div><div class=cn>mem</div><div class=cs id=ds-m>检查中...</div></div>
     </div>
-    <nav>
-      <a href="#" class="nav-item active" data-page="hermes">
-        <span class="icon">💬</span>
-        <span class="label">Hermes</span>
-      </a>
-      <a href="#" class="nav-item" data-page="ccb">
-        <span class="icon">🤖</span>
-        <span class="label">CCB</span>
-      </a>
-      <a href="#" class="nav-item" data-page="sql-http">
-        <span class="icon">📋</span>
-        <span class="label">SQL-HTTP</span>
-      </a>
-      <a href="#" class="nav-item" data-page="mem">
-        <span class="icon">🧠</span>
-        <span class="label">MEM</span>
-      </a>
-    </nav>
-  </aside>
-
-  <!-- 主内容区 -->
-  <main id="content">
-    <!-- 顶部栏（手机端显示） -->
-    <div id="topbar">
-      <button id="menu-btn">☰</button>
-      <span id="topbar-title">NTN 总控台</span>
+    <div class=sys-title>⚙️ 系统</div>
+    <div class=sys-grid>
+      <span class=sys-label>模型</span><span class=sys-value id=sm>-</span>
+      <span class=sys-label>版本</span><span class=sys-value id=sv>-</span>
+      <span class=sys-label>运行</span><span class=sys-value id=su>-</span>
     </div>
-    <iframe id="page-frame" src="pages/hermes.html"></iframe>
-  </main>
-
+  </div>
+  <div id=chat>
+    <div id=chat-hdr>
+      <h2>💬</h2>
+      <span id=chtitle></span>
+      <button class=hbtn onclick="showHistory()">📋 历史</button>
+      <button class="hbtn danger" onclick="doNew()">🆕 新对话</button>
+    </div>
+    <div id=chat-msgs></div>
+    <div id=chat-ia><textarea id=chat-ci rows=1 placeholder="输入消息... (Enter发送, /new 新对话)"></textarea><button id=chat-sb>发送</button></div>
+  </div>
+  <div class=hist id=hist-mod>
+    <div class=hist-box>
+      <div class=hist-hdr><h3>📋 对话历史</h3><button class=hist-close onclick="hideHistory()">✕</button></div>
+      <div class=hist-list id=hist-list></div>
+    </div>
+  </div>
+  <div id=page style=display:none><iframe id=pf></iframe></div>
 </div>
+<script>
+var ni=document.querySelectorAll('#topnav .ni'),da=document.getElementById('dash'),ch=document.getElementById('chat'),pg=document.getElementById('page'),pf=document.getElementById('pf')
+var pgm={config:'pages/config.html',ccb:'pages/ccb.html',sql:'pages/sql-http.html',mem:'pages/mem.html'}
+function sw(p){
+  ni.forEach(function(i){i.classList.toggle('active',i.dataset.p===p)})
+  da.style.display='none';ch.style.display='none';pg.style.display='none'
+  if(p==='dash'){da.style.display='block'}
+  else if(p==='hermes'){ch.style.display='flex';initChat()}
+  else{pg.style.display='flex';pf.src=pgm[p]}
+}
+ni.forEach(function(i){i.onclick=function(e){e.preventDefault();sw(this.dataset.p)}})
+document.querySelectorAll('.card').forEach(function(c){c.onclick=function(){sw(this.dataset.p)}})
+function ld(){
+  fetch('/api/hermes/health').then(function(r){return r.json()}).then(function(d){
+    var ok=d.status==='ok'
+    document.getElementById('ds-h').textContent=ok?'运行中':'离线'
+    var cfg=document.getElementById('ds-cfg')
+    if(cfg)cfg.textContent=ok?'运行中':'离线'
+    document.getElementById('sm').textContent=d.model||'-'
+    document.getElementById('sv').textContent=d.version||'-'
+    document.getElementById('su').textContent=ok?'运行中':'离线'
+  }).catch(function(){
+    document.getElementById('ds-h').textContent='离线'
+    document.getElementById('su').textContent='离线'
+  })
+  fetch('/api/sql-proxy/health').then(function(r){document.getElementById('ds-s').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-s').textContent='离线'})
+  fetch('/api/ccb-progress/health').then(function(r){document.getElementById('ds-c').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-c').textContent='离线'})
+  fetch('/api/mem/health').then(function(r){document.getElementById('ds-m').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-m').textContent='离线'})}
+ld();setInterval(ld,30000);sw('dash')
+var chatInited=false,cim=document.getElementById('chat-msgs'),cic=document.getElementById('chat-ci'),csb=document.getElementById('chat-sb'),chmsgs=[]
+function addMsg(r,t){
+  var d=document.createElement("div");d.className="msg "+r;var b=document.createElement("div");b.className="b";b.textContent=t
+  d.appendChild(b);cim.appendChild(d);cim.scrollTop=cim.scrollHeight
+}
+function send(){
+  var t=cic.value.trim();if(!t)return
+  if(t==='/new'){cic.value='';doNew();return}
+  addMsg("mu",t);cic.value="";cic.style.height="auto";chmsgs.push({role:"user",content:t})
+  fetch("/api/hermes/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+K},body:JSON.stringify({model:"deepseek-v4-flash",messages:chmsgs})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var r=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||d.error&&d.error.message||"—"
+    addMsg("ma",r);chmsgs.push({role:"assistant",content:r});saveConv()
+  }).catch(function(){addMsg("ma","连接失败")})
+}
+var CK='ntn_chat_list',CH='ntn_active_id',curId=null,K='webchat-key-1781853969'
+function loadList(){try{var s=localStorage.getItem(CK);return s?JSON.parse(s):[]}catch(e){return []}}
+function saveList(list){try{localStorage.setItem(CK,JSON.stringify(list))}catch(e){}}
+function uid(){return 'conv_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)}
+function guessTitle(msgs){for(var i=0;i<msgs.length;i++){if(msgs[i].role==='user'){var t=msgs[i].content.trim();return t.length>20?t.slice(0,20)+'…':t}}return '新对话'}
+function saveConv(){
+  var list=loadList();if(chmsgs.length===0)return
+  var idx=-1;for(var i=0;i<list.length;i++){if(list[i].id===curId){idx=i;break}}
+  var now=new Date().toISOString(),title=guessTitle(chmsgs)
+  if(idx>=0){
+    list[idx].messages=JSON.parse(JSON.stringify(chmsgs));list[idx].updated=now
+    if(chmsgs.length<=2||!list[idx].title||list[idx].title==='新对话')list[idx].title=title
+  }else{list.push({id:curId,title:title,messages:JSON.parse(JSON.stringify(chmsgs)),created:now,updated:now})}
+  saveList(list);var e=document.getElementById('chtitle');if(e)e.textContent=title
+  try{localStorage.setItem(CH,curId)}catch(e2){}
+}
+function loadConv(id,messages){
+  curId=id;chmsgs=messages||[];cim.innerHTML=''
+  chmsgs.forEach(function(m){addMsg(m.role==='user'?'mu':'ma',m.content)})
+  var e=document.getElementById('chtitle');if(e)e.textContent=guessTitle(chmsgs)
+  try{localStorage.setItem(CH,curId)}catch(ee){};cim.scrollTop=cim.scrollHeight
+}
+function doNew(){
+  if(chmsgs.length>0)saveConv();curId=uid();chmsgs=[];cim.innerHTML=''
+  var e=document.getElementById('chtitle');if(e)e.textContent='新对话'
+  try{localStorage.setItem(CH,curId)}catch(ee){};cic.focus()
+}
+function showHistory(){
+  var list=loadList(),el=document.getElementById('hist-list')
+  if(list.length===0){el.innerHTML='<div class=hist-empty>暂无历史对话</div>'}
+  else{
+    el.innerHTML=list.slice().reverse().map(function(c){
+      var time=c.updated||c.created||'';if(time.length>16)time=time.slice(0,16).replace('T',' ')
+      return '<div class=hist-item onclick="loadHist(\''+c.id+'\')">'
+        +'<span class=h-title>'+(c.title||'对话')+'</span>'
+        +'<span class=h-time>'+time+'</span>'
+        +'<span class=hist-del onclick="event.stopPropagation();delHist(\''+c.id+'\')">🗑</span></div>'
+    }).join('')
+  }
+  document.getElementById('hist-mod').classList.add('show')
+}
+function hideHistory(){document.getElementById('hist-mod').classList.remove('show')}
+function loadHist(id){
+  saveConv();var list=loadList()
+  for(var i=0;i<list.length;i++){if(list[i].id===id){loadConv(list[i].id,list[i].messages);hideHistory();return}}
+}
+function delHist(id){
+  var list=loadList();list=list.filter(function(c){return c.id!==id});saveList(list);showHistory()
+}
+function initChat(){
+  if(chatInited)return;chatInited=true
+  var aid=null;try{aid=localStorage.getItem(CH)}catch(e){}
+  if(aid){
+    var list=loadList(),found=false
+    for(var i=0;i<list.length;i++){if(list[i].id===aid){loadConv(list[i].id,list[i].messages);found=true;break}}
+    if(!found){curId=uid();try{localStorage.setItem(CH,curId)}catch(e){}}
+  }else{curId=uid();try{localStorage.setItem(CH,curId)}catch(e){}}
+  var e=document.getElementById('chtitle');if(e)e.textContent=guessTitle(chmsgs)
+  csb.onclick=send;cic.onkeydown=function(ev){if(ev.key=="Enter"&&!ev.shiftKey){ev.preventDefault();send()}}
+  cic.oninput=function(){this.style.height="auto";this.style.height=Math.min(this.scrollHeight,80)+"px"}
+  if(window.visualViewport){
+    var vph=window.innerHeight
+    window.visualViewport.addEventListener('resize',function(){
+      var h=window.visualViewport.height
+      if(h<vph-80){document.getElementById('chat').style.height=h+'px';document.getElementById('chat').style.flex='none'}
+      else{document.getElementById('chat').style.height='';document.getElementById('chat').style.flex=''}
+    })
+  }
 
-<script src="js/app.js"></script>
+}
+</script>
 </body>
 </html>

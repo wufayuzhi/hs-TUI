@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CCB - NTN 总控台</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,7 +40,7 @@ body {
 .view { display: none; }
 .view.active { display: block; }
 
-/* ── 进度面板（摘要视图） ── */
+/* ── 进度面板 ── */
 .progress-panel {
   background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a;
   padding: 20px; margin-bottom: 16px;
@@ -56,12 +56,10 @@ body {
 .stage-name { flex: 1; }
 .stage-status { font-size: 11px; color: #666; }
 
-/* ── 进度条 ── */
 .progress-bar-bg { height: 6px; background: #2a2a4a; border-radius: 3px; margin: 10px 0; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #4fc3f7, #42a5f5);
   border-radius: 3px; width: 0%; transition: width 0.5s; }
 
-/* ── 详细操作列表 ── */
 .detail-list { margin-top: 12px; }
 .detail-item {
   font-size: 12px; padding: 6px 0; color: #a0c0e0;
@@ -79,7 +77,6 @@ body {
   font-size: 12px; color: #a0a0c0; background: #0f0f20;
 }
 .log-meta { color: #666; font-size: 11px; }
-
 #log-content {
   padding: 10px 14px; font-family: "Menlo", "Consolas", monospace;
   font-size: 12px; line-height: 1.6; color: #a0c0e0;
@@ -98,22 +95,39 @@ body {
 .btn.primary { background: #1a237e; border-color: #4fc3f7; color: #4fc3f7; }
 .btn.primary:hover { background: #283593; }
 
-/* ── Remote Control ── */
-.remote-section { background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a; overflow: hidden; margin-top: 16px; }
-.remote-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; border-bottom: 1px solid #2a2a4a;
-}
-.remote-header h3 { color: #4fc3f7; font-size: 14px; }
-.remote-placeholder {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 40px; gap: 10px; background: #0d0d1a; color: #666; font-size: 13px;
-}
+/* ── 配置面板 ── */
+.config-sec { background: #16213e; border-radius: 8px; border: 1px solid #2a2a4a; margin-bottom: 12px; overflow: hidden; }
+.config-sh { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; user-select: none; }
+.config-sh h3 { font-size: 14px; font-weight: 600; color: #a0a0c0; }
+.config-ar { font-size: 12px; color: #666; transition: transform .2s; }
+.config-sh.op .config-ar { transform: rotate(180deg); }
+.config-sc { padding: 0 14px 12px; display: none; }
+.config-sc.op { display: block; }
+.config-fg { display: flex; flex-direction: column; gap: 6px; }
+.config-fg select, .config-fg input { width: 100%; background: #1a1a3e; border: 1px solid #3a3a5a; border-radius: 6px; color: #e0e0e0; padding: 8px 10px; font-size: 13px; outline: none; }
+.config-fg select:focus, .config-fg input:focus { border-color: #4fc3f7; }
+.config-ag { display: flex; gap: 6px; margin-top: 8px; }
+.config-bt { background: #2a2a4a; color: #e0e0e0; border: 1px solid #3a3a5a; border-radius: 6px; padding: 7px 14px; font-size: 12px; cursor: pointer; flex: 1; text-align: center; }
+.config-bt:active { background: #3a3a5a; }
+.config-bt-p { background: #0d47a1; border-color: #1565c0; color: #fff; }
+.config-bt-g { background: #1b5e20; border-color: #2e7d32; color: #fff; }
+.config-rs { margin-top: 6px; padding: 6px 10px; border-radius: 4px; font-size: 12px; line-height: 1.4; display: none; }
+.config-rs.s { display: block; background: #1a3a2a; color: #81c784; }
+.config-rs.e { display: block; background: #3a1a1a; color: #e57373; }
+.config-hn { font-size: 11px; color: #666; margin-top: 6px; }
+
+/* ── 开关 ── */
+.switch-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+.switch-wrap span { font-size: 14px; }
+.switch { position: relative; width: 48px; height: 26px; cursor: pointer; }
+.switch input { display: none; }
+.slider { position: absolute; inset: 0; background: #3a3a5a; border-radius: 13px; transition: .3s; }
+.slider::before { content: ""; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; }
+.switch input:checked + .slider { background: #4fc3f7; }
+.switch input:checked + .slider::before { transform: translateX(22px); }
 
 /* ── 空闲状态 ── */
-.idle-box {
-  text-align: center; padding: 30px 20px; color: #666;
-}
+.idle-box { text-align: center; padding: 30px 20px; color: #666; }
 .idle-box .big-icon { font-size: 40px; opacity: 0.3; margin-bottom: 8px; }
 
 /* ── 手机端适配 ── */
@@ -152,7 +166,7 @@ body {
     <div class="value gray" id="step-status">-</div>
   </div>
   <div class="card">
-    <div class="label">文件操作</div>
+    <div class="label">获取操作</div>
     <div class="value gray" id="stats-status">-</div>
   </div>
 </div>
@@ -162,12 +176,14 @@ body {
   <button class="btn primary" onclick="checkCCB()">🔄 刷新</button>
   <button class="btn" onclick="showView('summary')">📊 进度摘要</button>
   <button class="btn" onclick="showView('log')">📋 详细日志</button>
+  <button class="btn" onclick="showView('config')">⚙️ 配置</button>
 </div>
 
 <!-- Tab 切换 -->
 <div class="tabs">
-  <div class="tab active" onclick="showView('summary')">📊 任务进度摘要</div>
-  <div class="tab" onclick="showView('log')">📋 详细执行日志</div>
+  <div class="tab active" onclick="showView('summary')">📊 任务进度</div>
+  <div class="tab" onclick="showView('log')">📋 执行日志</div>
+  <div class="tab" onclick="showView('config')">⚙️ 配置</div>
 </div>
 
 <!-- 视图1: 进度摘要 -->
@@ -207,6 +223,51 @@ body {
   </div>
 </div>
 
+<!-- 视图3: 配置 -->
+<div class="view" id="view-config">
+  <!-- 模型配置 -->
+  <div class="config-sec">
+    <div class="config-sh" onclick="toggleSec('ccb-model')">
+      <h3>🤖 模型配置</h3><span class="config-ar">▼</span>
+    </div>
+    <div id="ccb-model" class="config-sc">
+      <div class="config-fg">
+        <select id="ccb-pr"><option value="">-- Provider --</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="google">Google/Gemini</option>
+          <option value="glm">智谱 GLM</option>
+          <option value="kimi">Kimi/Moonshot</option>
+          <option value="minimax">MiniMax</option>
+        </select>
+        <input type="text" id="ccb-md" placeholder="模型名 (如 deepseek-chat)">
+        <input type="password" id="ccb-ak" placeholder="API Key">
+      </div>
+      <div class="config-ag">
+        <button class="config-bt config-bt-p" onclick="saveCCBModel()">💾 保存</button>
+      </div>
+      <div id="ccb-mr" class="config-rs"></div>
+    </div>
+  </div>
+
+  <!-- 多Agent 开关 -->
+  <div class="config-sec">
+    <div class="config-sh op" onclick="toggleSec('ccb-agent')">
+      <h3>🤖 多Agent 模式</h3><span class="config-ar">▼</span>
+    </div>
+    <div id="ccb-agent" class="config-sc op">
+      <div class="switch-wrap">
+        <span>启用多Agent协作</span>
+        <label class="switch"><input type="checkbox" id="ccb-ma" onchange="saveCCBMode()"><span class="slider"></span></label>
+      </div>
+      <div class="config-hn">开启后，CCB 将使用多Agent协调执行任务（Coordinator/Swarm模式）</div>
+      <div id="ccb-mar" class="config-rs"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const CCB_URL = "/api/ccb-progress";
 let logTimer = null;
@@ -214,22 +275,30 @@ let currentView = "summary";
 
 function $(id) { return document.getElementById(id); }
 
+// 折叠面板
+function toggleSec(id) {
+  var el = $(id), sh = el.previousElementSibling;
+  el.classList.toggle("op"); sh.classList.toggle("op");
+}
+
 // Tab / 视图切换
 function showView(name) {
   currentView = name;
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.getElementById("view-" + name).classList.add("active");
-  document.querySelectorAll(".tab")[name === "summary" ? 0 : 1].classList.add("active");
+  var idx = {summary:0, log:1, config:2}[name] || 0;
+  document.querySelectorAll(".tab")[idx].classList.add("active");
 
   if (name === "log") {
     if (!logTimer) { fetchLog(); logTimer = setInterval(fetchLog, 3000); }
   } else {
     if (logTimer) { clearInterval(logTimer); logTimer = null; }
   }
+  if (name === "config") loadCCBConfig();
 }
 
-// 计算进度百分比（基于阶段）
+// 计算进度百分比
 function calcProgress(status, step) {
   if (status === "done" || status === "completed") return 100;
   if (status === "idle") return 0;
@@ -242,12 +311,12 @@ function calcProgress(status, step) {
 // 渲染进度摘要
 function renderSummary(data) {
   if (!data || data.status === "idle" || !data.task) {
-    $("#idle-view").style.display = "block";
-    $("#active-view").style.display = "none";
+    $("idle-view").style.display = "block";
+    $("active-view").style.display = "none";
     return;
   }
-  $("#idle-view").style.display = "none";
-  $("#active-view").style.display = "block";
+  $("idle-view").style.display = "none";
+  $("active-view").style.display = "block";
 
   let summary = data.summary || "处理中...";
   let step = data.step || "未知";
@@ -255,14 +324,11 @@ function renderSummary(data) {
   let details = data.details || [];
   let stats = data.stats || {};
 
-  // 阶段图标
   const stageIcons = {"分析需求":"🔍","方案设计":"📐","编码实现":"✏️","测试验证":"🧪","完成":"✅"};
   let icon = stageIcons[step] || "🔄";
 
-  // 标题
-  $("#summary-text").textContent = summary;
+  $("summary-text").textContent = summary;
 
-  // 进度条
   let pct = calcProgress(status, step);
   let fill = document.getElementById("progress-fill");
   fill.style.width = pct + "%";
@@ -270,10 +336,9 @@ function renderSummary(data) {
     ? "linear-gradient(90deg, #66bb6a, #81c784)"
     : "linear-gradient(90deg, #4fc3f7, #42a5f5)";
 
-  $("#p-task-name").textContent = "📋 " + data.task;
-  $("#p-step-name").textContent = icon + " " + step + "  (" + pct + "%)";
+  $("p-task-name").textContent = "📋 " + data.task;
+  $("p-step-name").textContent = icon + " " + step + "  (" + pct + "%)";
 
-  // 阶段卡片
   const stages = ["分析需求","方案设计","编码实现","测试验证","完成"];
   let stageHtml = "";
   let found = false;
@@ -294,14 +359,12 @@ function renderSummary(data) {
   }
   document.getElementById("stage-list").innerHTML = stageHtml;
 
-  // 统计信息
   let statParts = [];
   if (stats.read) statParts.push("📖 分析" + stats.read + "个文件");
   if (stats.write) statParts.push("✏️ 修改" + stats.write + "个文件");
   if (stats.run) statParts.push("⚙️ 运行" + stats.run + "次命令");
-  $("#stats-status").textContent = statParts.join(" | ") || "-";
+  $("stats-status").textContent = statParts.join(" | ") || "-";
 
-  // 详细操作
   let detailHtml = details.length
     ? details.map(d => `<div class="detail-item">${d}</div>`).join("")
     : '<div class="detail-item" style="color:#666">暂无详细操作记录</div>';
@@ -311,38 +374,28 @@ function renderSummary(data) {
 // 检查 CCB 状态
 async function checkCCB() {
   try {
-    // 版本
     let r = await fetch(CCB_URL + "/version");
     let v = await r.json();
-    $("#version-badge").textContent = v.version || "未知";
-
-    // 进度
+    $("version-badge").textContent = v.version || "未知";
     r = await fetch(CCB_URL + "/status");
     let s = await r.json();
-
     if (!s.task || s.status === "idle") {
-      $("#ccb-status").textContent = "⏹ 空闲";
-      $("#ccb-status").className = "value gray";
+      $("ccb-status").textContent = "⏹ 空闲";
+      $("ccb-status").className = "value gray";
       renderSummary({status:"idle"});
-      $("#step-status").textContent = "-";
-      $("#task-status").textContent = "无";
+      $("step-status").textContent = "-";
+      $("task-status").textContent = "无";
     } else {
-      $("#ccb-status").textContent = "▶ 执行中";
-      $("#ccb-status").className = "value green";
-      $("#task-status").textContent = s.task;
-      $("#step-status").textContent = s.step || "-";
+      $("ccb-status").textContent = "▶ 执行中";
+      $("ccb-status").className = "value green";
+      $("task-status").textContent = s.task;
+      $("step-status").textContent = s.step || "-";
       renderSummary(s);
     }
-
-    let ts = s.updated_at || "-";
-    if (ts !== "-" && ts.length > 10) ts = ts.slice(0, 19).replace("T", " ");
-    $("#time-status").textContent = ts;
-    $("#time-status").parentElement.querySelector(".label").textContent = "更新时间";
-
   } catch (e) {
-    $("#version-badge").textContent = "连接失败";
-    $("#ccb-status").textContent = "⚠ 无法连接";
-    $("#ccb-status").className = "value gray";
+    $("version-badge").textContent = "连接失败";
+    $("ccb-status").textContent = "⚠ 无法连接";
+    $("ccb-status").className = "value gray";
   }
 }
 
@@ -360,7 +413,49 @@ async function fetchLog() {
   }
 }
 
-// 启动定时器
+// 加载 CCB 配置
+async function loadCCBConfig() {
+  try {
+    let r = await fetch(CCB_URL + "/api/config");
+    let cfg = await r.json();
+    if (cfg.provider) $("ccb-pr").value = cfg.provider;
+    if (cfg.model) $("ccb-md").value = cfg.model;
+    if (cfg.api_key) $("ccb-ak").value = cfg.api_key;
+    $("ccb-ma").checked = cfg.multi_agent === true;
+  } catch(e) {
+    // 配置接口还未就绪时静默
+  }
+}
+
+// 保存模型配置
+async function saveCCBModel() {
+  var body = {provider: $("ccb-pr").value, model: $("ccb-md").value, api_key: $("ccb-ak").value};
+  try {
+    var r = await fetch(CCB_URL + "/api/config", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    var d = await r.json();
+    $("ccb-mr").className = d.ok ? "config-rs s" : "config-rs e";
+    $("ccb-mr").textContent = d.ok ? "✅ 保存成功" : "❌ 保存失败: "+(d.error||"未知错误");
+  } catch(e) {
+    $("ccb-mr").className = "config-rs e";
+    $("ccb-mr").textContent = "❌ 连接失败";
+  }
+}
+
+// 保存多Agent模式开关
+async function saveCCBMode() {
+  var on = $("ccb-ma").checked;
+  try {
+    var r = await fetch(CCB_URL + "/api/multi-agent-mode", {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({enabled: on})});
+    var d = await r.json();
+    $("ccb-mar").className = d.ok ? "config-rs s" : "config-rs e";
+    $("ccb-mar").textContent = d.ok ? "✅ 已" + (on?"启用":"关闭") + "多Agent模式" : "❌ 失败";
+  } catch(e) {
+    $("ccb-mar").className = "config-rs e";
+    $("ccb-mar").textContent = "❌ 连接失败";
+  }
+}
+
+// 启动
 checkCCB();
 setInterval(checkCCB, 5000);
 </script>

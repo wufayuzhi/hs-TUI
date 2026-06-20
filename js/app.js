@@ -1,66 +1,43 @@
-document.addEventListener('DOMContentLoaded', function () {
-  var sidebar = document.getElementById('sidebar');
-  var toggleBtn = document.getElementById('toggle-btn');
-  var menuBtn = document.getElementById('menu-btn');
-  var overlay = document.getElementById('overlay');
-  var navItems = document.querySelectorAll('.nav-item');
-  var frame = document.getElementById('page-frame');
-  var topbarTitle = document.getElementById('topbar-title');
+document.addEventListener('DOMContentLoaded',function(){
+var ni=document.querySelectorAll('#topnav .ni'),f=document.getElementById('pf')
+var da=document.getElementById('dash')
+var pg={dash:'',hermes:'chat',config:'config',ccb:'ccb',sql:'sql-http',mem:'mem'}
 
-  var pageTitles = { hermes: 'Hermes', ccb: 'CCB', 'sql-http': 'SQL-HTTP', mem: 'MEM' };
+function sw(p){
+  ni.forEach(function(i){i.classList.toggle('active',i.dataset.p===p)})
+  da.style.display='none';f.style.display='none'
+  if(p==='dash'){da.style.display='block'}
+  else{f.style.display='block';f.src='pages/'+pg[p]+'.html'}
+}
 
-  var isMobile = function () { return window.innerWidth <= 768; };
+ni.forEach(function(i){i.onclick=function(e){e.preventDefault();sw(this.dataset.p)}})
+document.querySelectorAll('.card').forEach(function(c){c.onclick=function(){sw(this.dataset.p)}})
 
-  // 切换页面
-  function switchPage(page) {
-    navItems.forEach(function (item) {
-      item.classList.toggle('active', item.dataset.page === page);
-    });
-    frame.src = 'pages/' + page + '.html';
-    topbarTitle.textContent = pageTitles[page] || page;
-    if (isMobile()) {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
-    }
-  }
-
-  // 桌面端：折叠/展开
-  toggleBtn.addEventListener('click', function () {
-    sidebar.classList.toggle('collapsed');
-    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-  });
-
-  // 手机端：打开/关闭
-  menuBtn.addEventListener('click', function () {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('show');
-  });
-  overlay.addEventListener('click', function () {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
-  });
-
-  // 导航点击
-  navItems.forEach(function (item) {
-    item.addEventListener('click', function (e) {
-      e.preventDefault();
-      switchPage(this.dataset.page);
-    });
-  });
-
-  // 窗口变化
-  window.addEventListener('resize', function () {
-    if (!isMobile()) {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
-    }
-  });
-
-  // 恢复记忆
-  if (localStorage.getItem('sidebarCollapsed') === 'true' && !isMobile()) {
-    sidebar.classList.add('collapsed');
-  }
-
-  // 启动
-  switchPage('hermes');
-});
+// 仪表台状态 - 带重试
+function ld(){
+  var ok=false
+  fetch('/api/hermes/health').then(function(r){return r.json()}).then(function(d){
+    ok=d.status==='ok'
+    document.getElementById('ds-h').textContent=ok?'运行中':'离线'
+    var cfg=document.getElementById('ds-cfg')
+    if(cfg)cfg.textContent=ok?'运行中':'离线'
+    document.getElementById('sm').textContent=d.model||'-'
+    document.getElementById('sv').textContent=d.version||'-'
+    document.getElementById('su').textContent=ok?'运行中':'离线'
+  }).catch(function(){
+    document.getElementById('ds-h').textContent='离线'
+    document.getElementById('su').textContent='离线'
+    // 2秒后重试一次
+    setTimeout(function(){
+      fetch('/api/hermes/health').then(function(r){return r.json()}).then(function(d){
+        if(d.status==='ok'){
+          document.getElementById('ds-h').textContent='运行中'
+          document.getElementById('su').textContent='运行中'
+        }
+      }).catch(function(){})
+    },2000)
+  })
+  fetch('/api/sql-proxy/health').then(function(r){document.getElementById('ds-s').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-s').textContent='离线'})
+  fetch('/api/ccb-progress/health').then(function(r){document.getElementById('ds-c').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-c').textContent='离线'})
+  fetch('/api/mem/health').then(function(r){document.getElementById('ds-m').textContent=r.ok?'运行中':'离线'}).catch(function(){document.getElementById('ds-m').textContent='离线'})}
+ld();setInterval(ld,30000);sw('dash')})
